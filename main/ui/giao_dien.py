@@ -1,4 +1,5 @@
 import tkinter as tk
+from PIL import ImageTk, Image
 from define import *
 
 
@@ -9,55 +10,95 @@ class GUI(tk.Tk):
         self.iconbitmap(PATH_ICON)
         self.state('zoomed')
         self.config(background='#000')
-        # self.geometry("1400x700")
 
-        # Tính toán kích thước khung và vị trí của chúng
-        frame_width = 700
-        frame_height = 500
-
-        # Khung số 1
         screen_width = self.winfo_screenwidth()
-        self.frame_1 = tk.Frame(
-            self, bd=2, relief="groove", background='#fff', highlightbackground="#000", highlightthickness=1)
-        self.frame_1.place(relx=0.5, rely=0, anchor="n",
-                           width=screen_width, height=20)
 
-        # Khung số 2
+        # FRAME 1
+
+        menubar = tk.Menu(self)
+        self.config(menu=menubar)
+
+        top_frame = tk.Frame(self, height=10, bg=COLOR_WHITE)
+        top_frame.pack(side=tk.TOP, fill=tk.X)
+
+        filemenu = tk.Menubutton(
+            top_frame, text="File", borderwidth=0, bg=COLOR_WHITE)
+        filemenu.pack(side=tk.LEFT, pady=1)
+
+        menu = tk.Menu(filemenu, tearoff=0)
+        filemenu["menu"] = menu
+        menu.add_command(label="Upload")
+        menu.add_separator()
+        menu.add_command(label="Exit", command=self.quit)
+
+        export_button = tk.Button(
+            top_frame, text="Export", borderwidth=0, bg=COLOR_WHITE)
+        export_button.pack(side=tk.LEFT, pady=2)
+
+        # END FRAME 1
+
+        # FRAME 2
         self.frame_2 = tk.Frame(
-            self, bd=2, relief="groove", background='#fff', highlightbackground="#000", highlightthickness=1)
-        self.frame_2.place(relx=0.5, rely=0.034, anchor="n",
+            self, bd=2, relief="groove", background=COLOR_WHITE)
+        self.frame_2.place(relx=0.5, rely=0.044, anchor="n",
                            width=screen_width, height=115)
+
+        self.logo = ImageTk.PhotoImage(Image.open(PATH_LOGO))
+        logo_ute = tk.Label(self.frame_2, image=self.logo, bg=COLOR_WHITE)
+        logo_ute.place(relx=0.01, rely=0.49, anchor="w")
+
+        school = tk.Label(
+            self.frame_2, text="Trường Đại Học Sư Phạm Kỹ Thuật TP.HCM", font=FONT_SCHOOL, bg=COLOR_WHITE)
+        school.place(relx=0.11, rely=0.2, anchor="w")
+        subject = tk.Label(
+            self.frame_2, text="Môn học: Xử Lý Ảnh Số", font=FONT_ST_INFO, bg=COLOR_WHITE)
+        subject.place(relx=0.11, rely=0.45, anchor="w")
+        lophoc = tk.Label(
+            self.frame_2, text="Lớp: DIPR430685_22_2_05CLC", font=FONT_ST_INFO, bg=COLOR_WHITE)
+        lophoc.place(relx=0.11, rely=0.7, anchor="w")
+
+        st_name_1 = tk.Label(
+            self.frame_2, text="Trương Tấn Phúc", font=FONT_ST_INFO, bg=COLOR_WHITE)
+        st_name_1.place(relx=0.85, rely=0.2, anchor="e")
+        st_id_1 = tk.Label(self.frame_2, text="20110554",
+                           font=FONT_ST_INFO, bg=COLOR_WHITE)
+        st_id_1.place(relx=0.95, rely=0.2, anchor="e")
+
+        st_name_2 = tk.Label(self.frame_2, text="Lê Văn Hiền",
+                             font=FONT_ST_INFO, bg=COLOR_WHITE)
+        st_name_2.place(relx=0.821, rely=0.45, anchor="e")
+        st_id_2 = tk.Label(self.frame_2, text="20110475",
+                           font=FONT_ST_INFO, bg=COLOR_WHITE)
+        st_id_2.place(relx=0.95, rely=0.45, anchor="e")
+
+        st_name_3 = tk.Label(self.frame_2, text="Lê Hải",
+                             font=FONT_ST_INFO, bg=COLOR_WHITE)
+        st_name_3.place(relx=0.79, rely=0.7, anchor="e")
+        st_id_3 = tk.Label(self.frame_2, text="20110464",
+                           font=FONT_ST_INFO, bg=COLOR_WHITE)
+        st_id_3.place(relx=0.95, rely=0.7, anchor="e")
+
+        # END FRAME 2
 
         # Khung số 3
         self.frame_3 = tk.Frame(
-            self, bd=2, relief="groove", background='#292929', highlightbackground="#fff", highlightthickness=1)
-        self.frame_3.place(relx=0, rely=0.585, anchor="w",
+            self, bd=2, relief="groove", background='#292929')
+        self.frame_3.place(relx=0, rely=0.598, anchor="w",
                            width=270, height=630)
 
         # Khung số 4
         self.frame_4 = tk.Frame(
-            self, bd=2, relief="groove", background='#7f7f7f', highlightbackground="#000", highlightthickness=1)
-        self.frame_4.place(relx=0.49999, rely=0.585, anchor="center",
-                           width=965, height=630)
+            self, bd=2, relief="groove", background='#7f7f7f')
+        self.frame_4.place(relx=0.5, rely=0.598, anchor="center",
+                           width=964, height=630)
 
         # Khung số 5
         self.frame_5 = tk.Frame(
-            self, bd=2, relief="groove", background='#292929', highlightbackground="#fff", highlightthickness=1)
-        self.frame_5.place(relx=1, rely=0.585, anchor="e",
+            self, bd=2, relief="groove", background='#292929')
+        self.frame_5.place(relx=1, rely=0.598, anchor="e",
                            width=270, height=630)
 
-        # # Khởi tạo khung bên trái để hiển thị hình ảnh
-        # self.image_frame_left = tk.Frame(
-        #     self, width=frame_width, height=frame_height, bd=2, relief="groove")
-        # self.image_frame_left.place(
-        #     relx=0.02, rely=0.1, width=frame_width, height=frame_height, anchor="nw")
 
-
-        # # Khởi tạo khung bên phải để hiển thị nội dung khác
-        # self.content_frame_right = tk.Frame(
-        #     self, width=frame_width, height=frame_height, bd=2, relief="groove")
-        # self.content_frame_right.place(
-        #     relx=1-0.02, rely=0.1, width=frame_width, height=frame_height, anchor="ne")
 if __name__ == "__main__":
     app = GUI()
     app.mainloop()
