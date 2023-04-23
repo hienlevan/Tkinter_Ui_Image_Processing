@@ -1,6 +1,9 @@
 import tkinter as tk
 from PIL import ImageTk, Image
+
 from define import *
+from upload_image import *
+from on_mouse_wheel import *
 
 
 class GUI(tk.Tk):
@@ -11,10 +14,7 @@ class GUI(tk.Tk):
         self.state('zoomed')
         self.config(background='#000')
 
-        screen_width = self.winfo_screenwidth()
-
         # FRAME 1
-
         menubar = tk.Menu(self)
         self.config(menu=menubar)
 
@@ -27,7 +27,9 @@ class GUI(tk.Tk):
 
         menu = tk.Menu(filemenu, tearoff=0)
         filemenu["menu"] = menu
-        menu.add_command(label="Upload")
+        menu.add_command(
+            label="Upload", command=lambda: upload_image(self.frame_4, self.frame_3_child))
+
         menu.add_separator()
         menu.add_command(label="Exit", command=self.quit)
 
@@ -38,6 +40,7 @@ class GUI(tk.Tk):
         # END FRAME 1
 
         # FRAME 2
+        screen_width = self.winfo_screenwidth()
         self.frame_2 = tk.Frame(
             self, bd=2, relief="groove", background=COLOR_WHITE)
         self.frame_2.place(relx=0.5, rely=0.044, anchor="n",
@@ -80,22 +83,42 @@ class GUI(tk.Tk):
 
         # END FRAME 2
 
-        # Khung số 3
+        # FRAME 3
         self.frame_3 = tk.Frame(
             self, bd=2, relief="groove", background='#292929')
         self.frame_3.place(relx=0, rely=0.598, anchor="w",
                            width=270, height=630)
 
+        self.frame_3_child = tk.Canvas(
+            self.frame_3, bd=1, relief="groove", background='#292929')
+        self.frame_3_child.place(relx=0.5, rely=0.22, anchor="center",
+                                 width=260, height=260)
+
         # Khung số 4
-        self.frame_4 = tk.Frame(
-            self, bd=2, relief="groove", background='#7f7f7f')
-        self.frame_4.place(relx=0.5, rely=0.598, anchor="center",
-                           width=964, height=630)
+        # Tạo một đối tượng Canvas để hiển thị ảnh
+        self.frame_4 = tk.Canvas(
+            self, bd=1, relief="groove", background='#7f7f7f')
+        self.frame_4.place(relx=0.34, rely=0.598,
+                           anchor="center", width=480, height=630)
+
+        # self.frame_4.bind(
+        #     "<MouseWheel>", lambda event: on_mouse_wheel(event, self.frame_4))
+
+        # self.frame_4.bind(
+        #     "<Button-1>", lambda event: on_left_button_down(event, self.frame_4))
+        # self.frame_4.bind(
+        #     "<B1-Motion>", lambda event: on_mouse_move(event, self.frame_4))
 
         # Khung số 5
         self.frame_5 = tk.Frame(
+            self, bd=2, relief="groove", background='#7f7f7f')
+        self.frame_5.place(relx=0.66, rely=0.598, anchor="center",
+                           width=480, height=630)
+
+        # Khung số 6
+        self.frame_6 = tk.Frame(
             self, bd=2, relief="groove", background='#292929')
-        self.frame_5.place(relx=1, rely=0.598, anchor="e",
+        self.frame_6.place(relx=1, rely=0.598, anchor="e",
                            width=270, height=630)
 
 
