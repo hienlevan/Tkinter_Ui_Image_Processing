@@ -121,13 +121,13 @@ class GUI(tk.Tk):
         # FRAME 4
         # Tạo một đối tượng Canvas để hiển thị ảnh
         self.frame_4 = tk.Canvas(
-            self, bd=0, relief="groove", background=COLOR_BG_4, highlightthickness=0)
+            self, bd=0, relief="groove", background=COLOR_MAIN_BACKGROUND, highlightthickness=0)
         self.frame_4.place(relx=0.34, rely=0.598,
                            anchor="center", width=480, height=630)
         
         # FRAME 5
         self.frame_5 = tk.Frame(
-            self, bd=0, relief="groove", background=COLOR_BG_4)
+            self, bd=0, relief="groove", background=COLOR_MAIN_BACKGROUND, highlightthickness=0)
         self.frame_5.place(relx=0.66, rely=0.598, anchor="center",
                            width=480, height=630)
 
