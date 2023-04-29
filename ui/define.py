@@ -16,5 +16,20 @@ COLOR_BG_2 = "#424769"
 COLOR_BG_3 = "#f9b17a"
 COLOR_BG_4 = "#676f9d"
 
-FONT_ST_INFO = ("Inter", 14)
-FONT_SCHOOL = ("Inter", 14, "bold")
+FONT_ST_INFO = ("Inter", 14, )
+FONT_SCHOOL = ("Montserrat", 14, "bold")
+FONT_CHOOSE = ("Time News Roman", 12, )
+
+
+# Comic Sans MS
+# Inter, Montserrat
+# Time News Roman
+# Arial
+# Calibri
+# Open Sans
+# Roboto
+# Helvetica
+# Fira Sans
+# Source Sans Pro
+# Nunito Sans
+# Montserrat

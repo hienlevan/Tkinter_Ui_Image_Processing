@@ -6,6 +6,7 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 
 
+
 def upload_image(frame1, frame2):
     # Xóa ảnh cũ (nếu có)
     frame1.delete("all")

@@ -1,15 +1,13 @@
 
-
-
 import tkinter as tk
 from PIL import ImageTk, Image
 import sys
-sys.path.append("./module")
+
+sys.path.append("module")
 import upload_image
 from upload_image import *
-from on_mouse_wheel import *
 from define import *
-
+from on_mouse_wheel import *
 
 
 class GUI(tk.Tk):
@@ -91,56 +89,52 @@ class GUI(tk.Tk):
 
         # FRAME 3
         self.frame_3 = tk.Frame(
-            self, bd=0, relief="groove", background=COLOR_BG_1)
-        self.frame_3.place(relx=0, rely=0.598, anchor="w",
+            self, bd=3, relief="flat", background=COLOR_BG_1)
+        self.frame_3.place(relx=0.003, rely=0.598, anchor="w",
                            width=270, height=630)
 
         self.frame_3_child = tk.Canvas(
-            self.frame_3, bd=0, relief="raised", background=COLOR_BG_2, highlightbackground="#000")
+            self.frame_3, bd=0, relief="flat", background=COLOR_MAIN_BACKGROUND, highlightbackground = '#161e31')
         self.frame_3_child.place(relx=0.5, rely=0.22, anchor="center",
                                  width=260, height=260)
+        
+        self.frame_3_child_2 = tk.Frame(self.frame_3, background=COLOR_MAIN_BACKGROUND, height=350)
+        self.frame_3_child_2.pack(fill=tk.X, side="bottom")
 
         selected = tk.StringVar()
-        r1 = tk.Radiobutton(self.frame_3, text='Làm mờ ảnh',
-                            value='Value 1', variable=selected, width=20, font=FONT_ST_INFO)
-        r2 = tk.Radiobutton(self.frame_3, text='Làm nét ảnh',
-                            value='Value 2', variable=selected, width=20, font=FONT_ST_INFO)
-        r3 = tk.Radiobutton(self.frame_3, text='Tách phông nền',
-                            value='Value 3', variable=selected, width=20, font=FONT_ST_INFO)
+        r1 = tk.Radiobutton(self.frame_3_child_2, text='Làm mờ ảnh',bg=COLOR_WHITE,indicatoron=0,
+                            value='1', variable=selected,font=FONT_CHOOSE, selectcolor=COLOR_BG_3, anchor='w')
+        r2 = tk.Radiobutton(self.frame_3_child_2, text='Làm nét ảnh',bg=COLOR_WHITE,indicatoron=0,
+                            value='2', variable=selected, font=FONT_CHOOSE, selectcolor=COLOR_BG_3, anchor='w')
+        r3 = tk.Radiobutton(self.frame_3_child_2, text='Tách phông nền',bg=COLOR_WHITE,indicatoron=0,
+                            value='3', variable=selected, font=FONT_CHOOSE, selectcolor=COLOR_BG_3, anchor='w')
 
-        r4 = tk.Radiobutton(self.frame_3, text='Làm mịn, giảm nhiễu ảnh',
-                            value='Value 3', variable=selected, width=20, font=FONT_ST_INFO)
+        r4 = tk.Radiobutton(self.frame_3_child_2, text='Làm mịn, giảm nhiễu ảnh',bg=COLOR_WHITE,indicatoron=0,
+                            value='4', variable=selected,font=FONT_CHOOSE, selectcolor=COLOR_BG_3, anchor='w')
+    
+        r1.place(x = 25, y = 10, width=220)
+        r2.place(x = 25, y = 60, width=220)
+        r3.place(x = 25, y = 110, width=220)
+        r4.place(x = 25, y = 160, width=220)
 
-        r1.place(relx=0.5, rely=0.5, anchor="center")
-        r2.place(relx=0.5, rely=0.6, anchor="center")
-        r3.place(relx=0.5, rely=0.7, anchor="center")
-        r4.place(relx=0.5, rely=0.8, anchor="center")
-
-        # Khung số 4
+      
+        # FRAME 4
         # Tạo một đối tượng Canvas để hiển thị ảnh
         self.frame_4 = tk.Canvas(
             self, bd=0, relief="groove", background=COLOR_BG_4, highlightthickness=0)
         self.frame_4.place(relx=0.34, rely=0.598,
                            anchor="center", width=480, height=630)
-
-        self.frame_4.bind(
-            "<MouseWheel>", lambda event: on_mouse_wheel(event, self.frame_4))
-
-        self.frame_4.bind(
-            "<Button-1>", lambda event: on_left_button_down(event, self.frame_4))
-        self.frame_4.bind(
-            "<B1-Motion>", lambda event: on_mouse_move(event, self.frame_4))
-
-        # Khung số 5
+        
+        # FRAME 5
         self.frame_5 = tk.Frame(
             self, bd=0, relief="groove", background=COLOR_BG_4)
         self.frame_5.place(relx=0.66, rely=0.598, anchor="center",
                            width=480, height=630)
 
-        # Khung số 6
+        # FRAME 6
         self.frame_6 = tk.Frame(
-            self, bd=0, relief="groove", background=COLOR_BG_1)
-        self.frame_6.place(relx=1, rely=0.598, anchor="e",
+            self, bd=0, relief="flat", background=COLOR_BG_1)
+        self.frame_6.place(relx=0.997, rely=0.598, anchor="e",
                            width=270, height=630)
 
         self.btn_reset = tk.Button(
