@@ -18,7 +18,7 @@ COLOR_BG_4 = "#676f9d"
 
 FONT_ST_INFO = ("Inter", 14, )
 FONT_SCHOOL = ("Montserrat", 14, "bold")
-FONT_CHOOSE = ("Time News Roman", 12, )
+FONT_CHOOSE = ("Roboto", 12, )
 
 
 # Comic Sans MS

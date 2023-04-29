@@ -117,19 +117,52 @@ class GUI(tk.Tk):
         r3.place(x = 25, y = 110, width=220)
         r4.place(x = 25, y = 160, width=220)
 
-      
+
+
+        # CONTAINER_4_5
+        self.container_4_5 = tk.Canvas(self, bg=COLOR_MAIN_BACKGROUND, highlightthickness=0)
+        self.container_4_5.place(relx=0.5, rely=0.598, anchor='center',width=960, height=630)
+        # FRAME 4
+
+
         # FRAME 4
         # Tạo một đối tượng Canvas để hiển thị ảnh
         self.frame_4 = tk.Canvas(
-            self, bd=0, relief="groove", background=COLOR_MAIN_BACKGROUND, highlightthickness=0)
-        self.frame_4.place(relx=0.34, rely=0.598,
-                           anchor="center", width=480, height=630)
+            self.container_4_5, bd=0, relief="groove", background=COLOR_MAIN_BACKGROUND, highlightthickness=0)
+        self.frame_4.place(relx=0, rely=0,
+                           anchor="nw", width=480, height=630)
         
         # FRAME 5
         self.frame_5 = tk.Frame(
-            self, bd=0, relief="groove", background=COLOR_MAIN_BACKGROUND, highlightthickness=0)
-        self.frame_5.place(relx=0.66, rely=0.598, anchor="center",
+            self.container_4_5, bd=0, relief="groove", background=COLOR_MAIN_BACKGROUND, highlightthickness=0)
+        self.frame_5.place(relx=1.005, rely=0, anchor="ne",
                            width=480, height=630)
+        
+
+        x_line = 482 # tọa độ x của điểm bắt đầu
+        y_line = 0  # tọa độ y của điểm bắt đầu
+        length_line = 630 # chiều dài của đường thẳng
+        self.container_4_5.create_line(x_line, y_line, x_line, y_line+length_line, fill='#fff')
+        
+
+        
+
+
+
+
+      
+        # # FRAME 4
+        # # Tạo một đối tượng Canvas để hiển thị ảnh
+        # self.frame_4 = tk.Canvas(
+        #     self, bd=0, relief="groove", background=COLOR_MAIN_BACKGROUND, highlightthickness=0)
+        # self.frame_4.place(relx=0.34, rely=0.598,
+        #                    anchor="center", width=480, height=630)
+        
+        # # FRAME 5
+        # self.frame_5 = tk.Frame(
+        #     self, bd=0, relief="groove", background=COLOR_MAIN_BACKGROUND, highlightthickness=0)
+        # self.frame_5.place(relx=0.66, rely=0.598, anchor="center",
+        #                    width=480, height=630)
 
         # FRAME 6
         self.frame_6 = tk.Frame(
