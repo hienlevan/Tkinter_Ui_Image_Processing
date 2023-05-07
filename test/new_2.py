@@ -14,8 +14,8 @@ from define import *
 f_container = None
 f_width = None
 f_height = None
-f_imscale = 1.0
-f_delta = 1.3
+f_imscale = 0.1
+f_delta = 0.4
 path_img = ''
 img = None
 
