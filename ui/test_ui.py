@@ -18,6 +18,19 @@ from module_zoom_image import *
 from module_upload_image import *
 from define import *
 
+# global label1, label2, label3
+# label1 = None
+# label2 = None
+# label3 = None
+
+global slider_lam_mo_1, slider_lam_mo_2
+slider_lam_mo_1 = None
+slider_lam_mo_2 = None
+
+
+global slider_tuong_phan_1
+slider_tuong_phan_1 = None
+
 
 global img_f4
 img_f4 = None 
@@ -58,12 +71,14 @@ menu.add_command(label="Exit", command=root.quit)
 
 def save_photo():
     global img_cur
-    path_save_photo = filedialog.asksaveasfilename(defaultextension=".png")
-    # print(path_save_photo)
-    img_save = cv2.cvtColor(np.array(img_cur), cv2.COLOR_BGR2RGB)
-    cv2.imwrite(path_save_photo, img_save)
-    messagebox.showinfo('Success',"Image saved success!")
-
+    if img_cur is not None:
+        path_save_photo = filedialog.asksaveasfilename(defaultextension=".png")
+        # print(path_save_photo)
+        img_save = cv2.cvtColor(np.array(img_cur), cv2.COLOR_BGR2RGB)
+        cv2.imwrite(path_save_photo, img_save)
+        messagebox.showinfo('Success!',"Lưu ảnh thành công!\n{}".format(str(path_save_photo)))
+    else:
+        messagebox.showerror('Error!',"Bạn chưa tải ảnh để xử lý\nHãy tải ảnh và thực hiện xử lý!")
 
 ###
 
@@ -127,6 +142,8 @@ radio_var = tk.IntVar(0)
 radiobutton_1 = ctk.CTkRadioButton(master=frame_3_child_2, text="Làm mờ",variable=radio_var, value=1, font=FONT_CHOOSE, command=lambda:choose_filter())
 radiobutton_2 = ctk.CTkRadioButton(master=frame_3_child_2, text="Thay đổi độ tương phản", variable=radio_var, value=2, font=FONT_CHOOSE, command=lambda:choose_filter())
 radiobutton_3 = ctk.CTkRadioButton(master=frame_3_child_2, text="Làm mịn và giảm nhiễu", variable=radio_var, value=3, font=FONT_CHOOSE, command=lambda:choose_filter())
+radiobutton_4 = ctk.CTkRadioButton(master=frame_3_child_2, text="Tăng giảm sáng", variable=radio_var, value=4, font=FONT_CHOOSE, command=lambda:choose_filter())
+
 radio_var.trace("w", lambda name, index, mode, var=radio_var: print("Current Radio Button Value: {}".format(var.get())))
 
 radiobutton_1.place(x = 25, y = 10)
@@ -183,18 +200,21 @@ def open_file_dialog():
     frame_4.delete("all")
     frame_5.delete("all")
     file_path = filedialog.askopenfilename()
-    img = cv2.imread(file_path)
-    # Chuyển đổi ảnh thành định dạng hình ảnh PIL
-    global img_f4
-    img_f4 = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    # Tạo một đối tượng ImageTk từ hình ảnh PIL để hiển thị trên canvas
-    global hien_thi_f4
-    max_size_frame4 = (frame_4.winfo_width(), frame_4.winfo_height())
-    img_resize_frame_4 = resize_image(img_f4, max_size_frame4)
-    hien_thi_f4 = ImageTk.PhotoImage(img_resize_frame_4)
-    x1_f4 = frame_4.winfo_width() / 2
-    y1_f4 = frame_4.winfo_height() / 2
-    frame_4.create_image(x1_f4, y1_f4, image=hien_thi_f4, anchor="center", tags="image")
+    if not file_path:
+        messagebox.showwarning("Warning!", "Bạn chưa chọn ảnh để tải lên!\nHãy tải ảnh để thực hiện việc xử lý")
+    else: 
+        img = cv2.imread(file_path)
+        # Chuyển đổi ảnh thành định dạng hình ảnh PIL
+        global img_f4
+        img_f4 = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        # Tạo một đối tượng ImageTk từ hình ảnh PIL để hiển thị trên canvas
+        global hien_thi_f4
+        max_size_frame4 = (frame_4.winfo_width(), frame_4.winfo_height())
+        img_resize_frame_4 = resize_image(img_f4, max_size_frame4)
+        hien_thi_f4 = ImageTk.PhotoImage(img_resize_frame_4)
+        x1_f4 = frame_4.winfo_width() / 2
+        y1_f4 = frame_4.winfo_height() / 2
+        frame_4.create_image(x1_f4, y1_f4, image=hien_thi_f4, anchor="center", tags="image")
 
 def update_(canvas, image):
     global hien_thi_canvas
@@ -207,17 +227,283 @@ def update_(canvas, image):
     y1 = canvas.winfo_height() / 2
     canvas.create_image(x1, y1, image=hien_thi_canvas, anchor="center", tags="image")
 
-def lam_mo_opencv2_active(image,sigma):
-    global img_kq
-    img_kq = lam_mo_opencv2(image,sigma)
-    update_(frame_5,img_kq)
+def chart_histogram():
+    global img_cur
+    imm_chart = np.array(img_cur)
+    # img_chart = cv2.cvtColor(np.array(img_cur), cv2.COLOR_BGR2RGB)
+    b, g, r = cv2.split(imm_chart)
+    # Create color maps for each channel
+    cm_r = plt.cm.colors.LinearSegmentedColormap.from_list('Reds', [(1, 0, 0), (1, 1, 1)], N=256)
+    cm_g = plt.cm.colors.LinearSegmentedColormap.from_list('Greens', [(0, 1, 0), (1, 1, 1)], N=256)
+    cm_b = plt.cm.colors.LinearSegmentedColormap.from_list('Blues', [(0, 0, 1), (1, 1, 1)], N=256)
 
-def lam_mo_opencv2(image,sigma):
+    # Destroy all children of frame_3_child
+    for widget in frame_3_child.winfo_children():
+        widget.destroy()
+    # Create a Figure object and a canvas for it
+    fig = plt.Figure(figsize=(10, 5))
+    canvas = FigureCanvasTkAgg(fig, master=frame_3_child)
+    # Add an Axes to the Figure
+    # global ax
+    ax = fig.add_subplot(111)
+    
+    # Plot histograms with color maps
+    # Plot red channel histogram
+    hist_r = cv2.calcHist([r], [0], None, [256], [0, 256])
+    ax.fill_between(np.arange(256), np.ravel(hist_r), color=cm_r(hist_r / np.max(hist_r)), alpha=0.5, label='Red')
+
+    # Plot green channel histogram
+    hist_g = cv2.calcHist([g], [0], None, [256], [0, 256])
+    ax.fill_between(np.arange(256), np.ravel(hist_g), color=cm_g(hist_g / np.max(hist_g)), alpha=0.5, label='Green')
+
+    # Plot blue channel histogram
+    hist_b = cv2.calcHist([b], [0], None, [256], [0, 256])
+    ax.fill_between(np.arange(256), np.ravel(hist_b), color=cm_b(hist_b / np.max(hist_b)), alpha=0.5, label='Blue')
+
+    # Configure plot
+    ax.set_xlim([0, 256])
+    ax.set_title('RGB Histogram', color='white')
+    ax.tick_params(axis='both', labelsize=7)
+    # Set the border color to white
+    ax.spines['top'].set_color('white')
+    ax.spines['bottom'].set_color('white')
+    ax.spines['left'].set_color('white')
+    ax.spines['right'].set_color('white')
+    ax.tick_params(colors='white')
+
+    ax.xaxis.label.set_color('black')
+    ax.yaxis.label.set_color('black')
+    ax.set_facecolor('black')
+    # Vô hiệu hóa đường viền trên và bên phải
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    ax.legend()
+    # ax.set_axis_off()
+    ax.legend().remove()
+    # print("Value RGB of Chart:\nR: {}, G: {}, B: {}".format(np.max(r),np.max(g), np.max(b)))
+    fig.patch.set_facecolor('black')
+    fig.subplots_adjust(left=0.17, right=0.9, bottom=0.1, top=0.9)
+    canvas.get_tk_widget().pack()
+    # Update canvas on frame_3_child
+    canvas.draw()
+
+
+# def check_and_delete(label_name, new_value=None):
+#     # Save the current value of the global variable
+#     old_value = globals().get(label_name)
+    
+#     # Check if the global variable exists and delete it
+#     if old_value is not None:
+#         old_value.destroy()
+        
+#     # If a new value is provided, set it as the new global variable
+#     if new_value is not None:
+#         globals()[label_name] = new_value 
+    
+#     # Set the value of the global variable to None after the function is called
+#     globals()[label_name] = None
+    
+#     print(label_name + ": " + str(globals()[label_name]))
+#     # Return the old value of the global variable
+#     return old_value
+#     # global_name = old_value
+
+# def test(test_case):
+#     global label1, label2, label3
+#     # label1 = None
+#     # label2 = None
+   
+#     if test_case == 1:
+#         if(label1 is not None):
+#             return
+#         if(label1 is None):
+#             #tạo label 1
+#             label1 = tk.Label(master=frame_3_child_2, text='label số 1')
+#             # hiển thị nó lên frame 
+#             label1.place(relx=0.35, rely=0.7)
+#             print("label1: " + str(label1))
+#         # if(label1 is not None):
+#         #     return
+#         if label2 is not None:
+#             check_and_delete("label2", None)
+    
+#         if label3 is not None:
+#             check_and_delete("label3", None)
+
+#     if test_case == 2:
+#         if(label2 == None):
+#             #tạo label 1
+#             label2 = tk.Label(master=frame_3_child_2, text='label số 2')
+#             # hiển thị nó lên frame 
+#             label2.place(relx=0.35, rely=0.8)
+#             print("label2: " + str(label2))
+
+#         if label1 is not None:
+#             check_and_delete("label1", None)
+    
+#         if label3 is not None:
+#             check_and_delete("label3", None)
+
+#     if test_case == 3:
+#         if(label3 == None):
+#             #tạo label 1
+#             label3 = tk.Label(master=frame_3_child_2, text='label số 3')
+#             # hiển thị nó lên frame 
+#             label3.place(relx=0.35, rely=0.9)
+#             print("label3: " + str(label3))
+#         if label1 is not None:
+#             check_and_delete("label1", None)
+    
+#         if label2 is not None:
+#             check_and_delete("label2", None)
+
+def check_and_delete_slider(slider_name, new_value=None):
+    # Save the current value of the global variable
+    old_value = globals().get(slider_name)
+    
+    # Check if the global variable exists and delete it
+    if old_value is not None:
+        old_value.destroy()
+        
+    # If a new value is provided, set it as the new global variable
+    if new_value is not None:
+        globals()[slider_name] = new_value 
+    
+    # Set the value of the global variable to None after the function is called
+    globals()[slider_name] = None
+    
+    print(slider_name + ": " + str(globals()[slider_name]))
+    # Return the old value of the global variable
+    return old_value
+    # global_name = old_value
+
+def call_lam_mo(case):
+    global slider_lam_mo_1, slider_lam_mo_2
+    global slider_tuong_phan_1
+
+    def slider_event(name_func,value):
+                # lam_mo_kernel_gaussian_active(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
+                name_func(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
+                chart_histogram()
+    if(case == 1):
+        if(slider_lam_mo_1 is None):
+            slider_lam_mo_1 = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=10,
+                                    command=lambda value: slider_event(lam_mo_kernel_gaussian_active, value)
+                                    )
+            slider_lam_mo_1.set(0)
+            slider_lam_mo_1.place(relx=0.35, rely=0.8, anchor='center')
+        if slider_lam_mo_2 is not None:
+            check_and_delete_slider("slider_lam_mo_2", None)
+        if slider_tuong_phan_1 is not None:
+            check_and_delete_slider("slider_tuong_phan_1", None)
+            
+    if(case == 2):
+        if(slider_lam_mo_2 is None):
+            slider_lam_mo_2 = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=100,
+                                    command=lambda value: slider_event(lam_mo_2_active, value)
+                                    )
+            slider_lam_mo_2.set(0)
+            slider_lam_mo_2.place(relx=0.35, rely=0.7, anchor='center')
+        if slider_lam_mo_1 is not None:
+            check_and_delete_slider("slider_lam_mo_1", None)
+        if slider_tuong_phan_1 is not None:
+            check_and_delete_slider("slider_tuong_phan_1", None)
+
+def call_tuong_phan(case):
+    global slider_tuong_phan_1
+    global slider_lam_mo_1, slider_lam_mo_2
+
+    def slider_event(name_func,value):
+                # lam_mo_kernel_gaussian_active(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
+                name_func(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
+                chart_histogram()
+    if(case == 1):
+        if(slider_tuong_phan_1 is None):
+            slider_tuong_phan_1 = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=50,
+                                    command=lambda value: slider_event(tuong_phan_logarit_active, value)
+                                    )
+            slider_tuong_phan_1.set(0)
+            slider_tuong_phan_1.place(relx=0.35, rely=0.8, anchor='center')
+        if slider_lam_mo_1 is not None:
+            check_and_delete_slider("slider_lam_mo_1", None)
+        if slider_lam_mo_2 is not None:
+            check_and_delete_slider("slider_lam_mo_2", None)
+
+
+def tuong_phan_logarit_active(img, c):
+    global img_kq
+    img_kq = tuong_phan_logarit(img, c)
+    update_(frame_5, img_kq)
+
+def tuong_phan_logarit(img, c):
+    global img_cur
+    img_temp = np.array(img, 'float')
+    # C là hệ số tỉ lệ thuận với độ tương phản
+    log_image = int(c)*(np.log(img_temp+1))
+    log_image = np.array(log_image, dtype='uint8') 
+    img_temp1 = Image.fromarray(cv2.cvtColor(log_image, cv2.COLOR_BGR2RGB))
+    # cập nhật ảnh trên frame 5
+    img_cur = img_temp1
+    return img_temp1
+
+
+    
+
+
+def lam_mo_2_active(img, amount):
+    global img_kq
+    img_kq = lam_mo_2(img, amount)
+    update_(frame_5, img_kq)
+
+def lam_mo_2(img, amount):
     global img_cur
     global blurred
-    global img_temp1
-    global ksize
-    global kernel
+    # global sharpened
+    kernel_size =(5, 5)
+    sigma=1.0
+    threshold=0
+    # """Return a sharpened version of the image, using an unsharp mask."""
+    blurred = cv2.GaussianBlur(img, kernel_size, sigma)
+    sharpened = float(amount + 1) * img - float(amount) * blurred
+    sharpened = np.maximum(sharpened, np.zeros(sharpened.shape))
+    sharpened = np.minimum(sharpened, 255 * np.ones(sharpened.shape))
+    sharpened = sharpened.round().astype(np.uint8)
+    if threshold > 0:
+        low_contrast_mask = np.absolute(img - blurred) < threshold
+        np.copyto(sharpened, img, where=low_contrast_mask)
+    img_temp1 = Image.fromarray(cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB))
+    img_cur = img_temp1
+    return img_temp1
+
+
+
+
+
+
+
+def lam_mo_kernel_gaussian_active(image,sigma):
+    global img_kq
+    img_kq = lam_mo_kernel_gaussian(image,sigma)
+    update_(frame_5,img_kq)
+
+def lam_mo_kernel_gaussian(image,sigma):
+    global img_cur
     # Kích thước kernel và độ lệch chuẩn
     ksize = 100 # ksize tỉ lệ thuận với độ lớn của kernel Gaussian
     # Tạo kernel Gaussian làm mờ ảnh và giảm nhiễu
@@ -230,7 +516,6 @@ def lam_mo_opencv2(image,sigma):
                 kernel[i,j] = 0 if x != 0 or y != 0 else 1
             else:
                 kernel[i,j] = np.exp(-(x**2 + y**2)/(2*sigma**2))/(2*np.pi*sigma**2)
-
     # Chuẩn hóa kernel
     kernel /= np.sum(kernel)
     # Áp dụng kernel vào từng kênh của ảnh bằng cách sử dụng filter2D
@@ -285,12 +570,19 @@ def lam_min_opencv2_active(img, sigma):
 def lam_min_opencv2(img, sigma):
     global img_cur
     global filtered_image
+    # global denoise_img
+    # global denoise_img
+    # denoise_img = cv2.medianBlur(img,int(kernel_size))
+    # img_cur = denoise_img
+    # return denoise_img
+
     # Chuyển đổi sigma sang kiểu số thực
     sigma = float(sigma)
 
     # Áp dụng phép lọc Median với kernel size tính toán từ sigma
     kernel_size = int(sigma * 3)
     kernel_size += 1 if kernel_size % 2 == 0 else 0
+
     # Kiểm tra self.image có khác None hay không
     if img is not None:
         # Chuyển đổi ảnh từ đối tượng Image sang mảng numpy
@@ -303,78 +595,6 @@ def lam_min_opencv2(img, sigma):
         return img_temp1
 
 
-def chart_histogram():
-    global img_cur
-    imm_chart = np.array(img_cur)
-    # img_chart = cv2.cvtColor(np.array(img_cur), cv2.COLOR_BGR2RGB)
-    b, g, r = cv2.split(imm_chart)
-    # Create color maps for each channel
-    cm_r = plt.cm.colors.LinearSegmentedColormap.from_list('Reds', [(1, 0, 0), (1, 1, 1)], N=256)
-    cm_g = plt.cm.colors.LinearSegmentedColormap.from_list('Greens', [(0, 1, 0), (1, 1, 1)], N=256)
-    cm_b = plt.cm.colors.LinearSegmentedColormap.from_list('Blues', [(0, 0, 1), (1, 1, 1)], N=256)
-
-    # Destroy all children of frame_3_child
-    for widget in frame_3_child.winfo_children():
-        widget.destroy()
-    # Create a Figure object and a canvas for it
-    fig = plt.Figure(figsize=(10, 5))
-    canvas = FigureCanvasTkAgg(fig, master=frame_3_child)
-    # Add an Axes to the Figure
-    # global ax
-    ax = fig.add_subplot(111)
-
-    # Plot histograms with color maps
-    # Plot red channel histogram
-    hist_r = cv2.calcHist([r], [0], None, [256], [0, 256])
-    ax.fill_between(np.arange(256), np.ravel(hist_r), color=cm_r(hist_r / np.max(hist_r)), alpha=0.5, label='Red')
-
-    # Plot green channel histogram
-    hist_g = cv2.calcHist([g], [0], None, [256], [0, 256])
-    ax.fill_between(np.arange(256), np.ravel(hist_g), color=cm_g(hist_g / np.max(hist_g)), alpha=0.5, label='Green')
-
-    # Plot blue channel histogram
-    hist_b = cv2.calcHist([b], [0], None, [256], [0, 256])
-    ax.fill_between(np.arange(256), np.ravel(hist_b), color=cm_b(hist_b / np.max(hist_b)), alpha=0.5, label='Blue')
-
-    # Configure plot
-    ax.set_xlim([0, 256])
-    ax.set_title('RGB Histogram', color='white')
-    ax.tick_params(axis='both', labelsize=7)
-    # Set the border color to white
-    ax.spines['top'].set_color('white')
-    ax.spines['bottom'].set_color('white')
-    ax.spines['left'].set_color('white')
-    ax.spines['right'].set_color('white')
-    ax.tick_params(colors='white')
-
-    ax.xaxis.label.set_color('black')
-    ax.yaxis.label.set_color('black')
-    ax.set_facecolor('black')
-    # Vô hiệu hóa đường viền trên và bên phải
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-
-    ax.legend()
-    # ax.set_axis_off()
-    ax.legend().remove()
-
-    print(np.max(r))
-    print(np.max(g))
-    print(np.max(b))
-
-    # Add the canvas to the frame
-    fig.patch.set_facecolor('black')
-    fig.subplots_adjust(left=0.17, right=0.9, bottom=0.1, top=0.9)
-    canvas.get_tk_widget().pack()
-
-    # Update canvas on frame_3_child
-    canvas.draw()
-    
-
-
-
-# def lam_net()
-   
 def choose_filter():
     frame_5.delete('all')
     global img_f4
@@ -382,82 +602,52 @@ def choose_filter():
     global anh_goc
     global img_cur
 
+    def display_after_img():
+        global anh_goc
+        global blur_tk
+        global img_cur
+        max_size = (frame_5.winfo_width(), frame_5.winfo_height())
+        img_resize_frame_5 = resize_image(img, max_size)
+        # cập nhật ảnh đang nằm trên frame 5
+        img_cur = img_resize_frame_5
+        anh_goc = img_resize_frame_5
+        blur_tk = ImageTk.PhotoImage(img_cur)
+        x1 = frame_5.winfo_width() / 2
+        y1 = frame_5.winfo_height() / 2
+        frame_5.create_image(x1, y1, image=blur_tk, anchor="center", tags="image")
+
     if radio_var.get() == 1:
-        # Lấy ảnh gốc từ hình ảnh PIL đã chọn
         img = img_f4
         if(img is None): messagebox.showerror('Error','Chưa Tải ảnh lên!')
-        else: 
-            menu = tk.Menu(root, tearoff=0)
-            menu.add_command(label='OpenCv', command=lambda: (sliderBar_action(lam_mo_opencv2_active),chart_histogram()))
-            menu.add_command(label='Without OpenCv', command=lambda: action_02())
-            menu.post(radiobutton_1.winfo_rootx(), radiobutton_1.winfo_rooty())
         if(img is not None):
-            # Tạo một đối tượng ImageTk từ hình ảnh PIL để hiển thị trên canvas
-            max_size = (frame_5.winfo_width(), frame_5.winfo_height())
-            img_resize_frame_5 = resize_image(img, max_size)
-            # cập nhật ảnh đang nằm trên frame 5
-            img_cur = img_resize_frame_5
-            anh_goc = img_resize_frame_5
-            blur_tk = ImageTk.PhotoImage(img_cur)
-            x1 = frame_5.winfo_width() / 2
-            y1 = frame_5.winfo_height() / 2
-            frame_5.create_image(x1, y1, image=blur_tk, anchor="center", tags="image")
-
-        def sliderBar_action(name_func):
-            # sử dụng ảnh hiện tại để làm mờ
-            global slider_lam_mo_opencv2
-            def slider_event(value):
-                # lam_mo_opencv2_active(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
-                name_func(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
-                chart_histogram()
-            slider_lam_mo_opencv2 = slider = ctk.CTkSlider(master=frame_3_child_2,
-                                    width=160,
-                                    height=16,
-                                    border_width=5.5,
-                                    from_=0, 
-                                    to=10,
-                                    command=slider_event)
-            slider_lam_mo_opencv2.set(0)
-            slider.place(relx=0.35, rely=0.8, anchor='center')
-
-            # Tạo một Label để hiển thị giá trị của sliderbar
-            label_slider_value = tk.Label(master=frame_3_child_2, text="{}".format(slider_lam_mo_opencv2.get()), bg=COLOR_MAIN_BACKGROUND, fg='white')
-            label_slider_value.place(relx=0.8, rely=0.8, anchor='center')
-            def on_slider_change(event):
-                label_slider_value.config(text=f"{slider_lam_mo_opencv2.get()}")
-            # slider_lam_mo_opencv2.bind('<B1-Motion>', on_slider_change)
-            slider_lam_mo_opencv2.bind('<B1-Motion>',command=on_slider_change)
+           
+            menu = tk.Menu(root, tearoff=0)
+            menu.add_command(label='KENEL GAUSSIAN', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(1)))
+            menu.add_command(label='mo_2', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(2)))
+            menu.add_command(label='mo_3', command=lambda: (display_after_img(),chart_histogram(), test(3)))
+            menu.post(radiobutton_1.winfo_rootx(), radiobutton_1.winfo_rooty())
+    if radio_var.get() == 2:
+        img = img_f4
+        if(img is None): messagebox.showerror('Error','Chưa Tải ảnh lên!')
+        if(img is not None):
+           
+            menu = tk.Menu(root, tearoff=0)
+            menu.add_command(label='Biến đổi Logarit', command=lambda: (display_after_img(),chart_histogram(), call_tuong_phan(1)))
+            # menu.add_command(label='mo_2', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(2)))
+            # menu.add_command(label='mo_3', command=lambda: (display_after_img(),chart_histogram(), test(3)))
+            menu.post(radiobutton_2.winfo_rootx(), radiobutton_2.winfo_rooty())
 
         
-        def action_02():
-            lam_mo_without_opencv2_active(anh_goc)
+    
 
-    if radio_var.get() == 2:
-        # Lấy ảnh gốc từ hình ảnh PIL đã chọn
-        img = img_f4
-        if(img is None): messagebox.showerror('Error','Chưa Tải ảnh lên!')
-        else: 
-            menu = tk.Menu(root, tearoff=0)
-            menu.add_command(label='OpenCv', command=lambda: (sliderBar_action(lam_net_opencv2_active),chart_histogram()))
-            menu.add_command(label='Without OpenCv', command=lambda: action_02())
-            menu.post(radiobutton_2.winfo_rootx(), radiobutton_2.winfo_rooty())
-        if(img is not None):
-            # Tạo một đối tượng ImageTk từ hình ảnh PIL để hiển thị trên canvas
-            max_size = (frame_5.winfo_width(), frame_5.winfo_height())
-            img_resize_frame_5 = resize_image(img, max_size)
-            # cập nhật ảnh đang nằm trên frame 5
-            img_cur = img_resize_frame_5
-            anh_goc = img_resize_frame_5
-            blur_tk = ImageTk.PhotoImage(img_cur)
-            x1 = frame_5.winfo_width() / 2
-            y1 = frame_5.winfo_height() / 2
-            frame_5.create_image(x1, y1, image=blur_tk, anchor="center", tags="image")
+
+        
 
         def sliderBar_action(name_func):
             # sử dụng ảnh hiện tại để làm mờ
-            global slider_lam_mo_opencv2
+            global slider_lam_mo_kernel_gaussian
             def slider_event(value):
-                # lam_mo_opencv2_active(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
+                # lam_mo_kernel_gaussian_active(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
                 name_func(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
                 chart_histogram()
             slider_lam_net_opencv2 = slider = ctk.CTkSlider(master=frame_3_child_2,
@@ -476,8 +666,6 @@ def choose_filter():
             def on_slider_change(event):
                 label_slider_value.config(text=f"{slider_lam_net_opencv2.get()}")
             slider_lam_net_opencv2.bind('<B1-Motion>',command= on_slider_change)
-
-
 
     if radio_var.get() == 3:
         # Lấy ảnh gốc từ hình ảnh PIL đã chọn
@@ -524,7 +712,6 @@ def choose_filter():
                 label_slider_value.config(text=f"{slider_lam_min_opencv2.get()}")
             slider_lam_min_opencv2.bind('<B1-Motion>', on_slider_change)
         
-
 root.mainloop()
 
 

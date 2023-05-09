@@ -18,6 +18,10 @@ from module_zoom_image import *
 from module_upload_image import *
 from define import *
 
+global label1, label2, label3
+label1 = None
+label2 = None
+label3 = None
 
 global img_f4
 img_f4 = None 
@@ -212,6 +216,101 @@ def lam_mo_opencv2_active(image,sigma):
     img_kq = lam_mo_opencv2(image,sigma)
     update_(frame_5,img_kq)
 
+
+# def test(str):
+#     global label_1
+#     global label_2
+#     label_1 = None
+#     label_2 = None
+#     if(str == "test1"):
+#         if(label_2 is not None):
+#             label_2.destroy()
+#         label_1 = tk.Label(master=frame_3_child_2, text="LABEL_01")
+#         label_1.place(relx=0.35, rely=0.7, anchor='center')
+#     if(str == "test2"):
+#         if(label_1 is not None):
+#             label_1.destroy()
+#         label_2 = tk.Label(master=frame_3_child_2, text="LABEL_02")
+#         label_2.place(relx=0.6, rely=0.8, anchor='center')
+
+
+
+def call_lam_mo(img, name_func):
+    global slider_lam_mo_opencv2
+    slider_lam_mo_opencv2 = None
+    global slider_lam_min_opencv2 
+    slider_lam_min_opencv2 = None
+    global label_slider_lam_mo_1
+    label_slider_lam_mo_1 = None
+    global label_slider_lam_min_1
+    label_slider_lam_min_1 = None
+    if (name_func == 'lam_mo_1'):
+        if(slider_lam_min_opencv2 is not None and label_slider_lam_min_1 is not None):
+            slider_lam_min_opencv2.destroy()
+            label_slider_lam_min_1.destroy()
+        def slider_event(value):
+        # lam_mo_opencv2_active(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
+            lam_mo_opencv2_active(cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB),value)
+            chart_histogram()
+        slider_lam_mo_opencv2 = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                        width=160,
+                                        height=16,
+                                        border_width=5.5,
+                                        from_=0, 
+                                        to=10,
+                                        command=slider_event)
+        slider_lam_mo_opencv2.set(0)
+        slider_lam_mo_opencv2.place(relx=0.35, rely=0.8, anchor='center')
+        label_slider_lam_mo_1 = tk.Label(master=frame_3_child_2, text="lam_mo_1")
+        label_slider_lam_mo_1.place(relx=0.35, rely=0.7, anchor='center')
+                # label_slider_value.place(relx=0.8, rely=0.8, anchor='center')
+        messagebox.showinfo('đang gọi hàm làm mờ')
+        print(slider_lam_mo_opencv2)
+    if(name_func == 'lam_mo_2'):
+        if(slider_lam_mo_opencv2 is not None and label_slider_lam_mo_1 is not None):
+            slider_lam_mo_opencv2.destroy()
+            label_slider_lam_mo_1.destroy()
+        def slider_event(value):
+            # lam_mo_opencv2_active(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
+            lam_min_opencv2_active(cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB),value)
+            chart_histogram()
+        slider_lam_min_opencv2 = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                        width=160,
+                                        height=16,
+                                        border_width=5.5,
+                                        from_=0, 
+                                        to=10,
+                                        command=slider_event)
+        slider_lam_min_opencv2.set(0)
+        slider_lam_min_opencv2.place(relx=0.35, rely=0.8, anchor='center')
+        label_slider_lam_min_1 = tk.Label(master=frame_3_child_2, text="lam_mo_2")
+        label_slider_lam_min_1.place(relx=0.5, rely=0.7, anchor='center')
+        messagebox.showinfo('đang gọi hàm làm mịn')
+        print(slider_lam_min_opencv2)
+
+
+
+
+
+def call_lam_mo_2(img):
+    global slider_lam_mo_opencv2
+    def slider_event(value):
+        # lam_mo_opencv2_active(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
+        lam_min_opencv2_active(cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB),value)
+        chart_histogram()
+    slider_lam_min_opencv2 = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=10,
+                                    command=slider_event)
+    slider_lam_min_opencv2.set(0)
+    slider_lam_min_opencv2.place(relx=0.35, rely=0.8, anchor='center')
+
+    messagebox.showinfo('đang gọi hàm làm mịn')
+    print(slider_lam_min_opencv2)
+
 def lam_mo_opencv2(image,sigma):
     global img_cur
     global blurred
@@ -285,12 +384,19 @@ def lam_min_opencv2_active(img, sigma):
 def lam_min_opencv2(img, sigma):
     global img_cur
     global filtered_image
+    # global denoise_img
+    # global denoise_img
+    # denoise_img = cv2.medianBlur(img,int(kernel_size))
+    # img_cur = denoise_img
+    # return denoise_img
+
     # Chuyển đổi sigma sang kiểu số thực
     sigma = float(sigma)
 
     # Áp dụng phép lọc Median với kernel size tính toán từ sigma
     kernel_size = int(sigma * 3)
     kernel_size += 1 if kernel_size % 2 == 0 else 0
+
     # Kiểm tra self.image có khác None hay không
     if img is not None:
         # Chuyển đổi ảnh từ đối tượng Image sang mảng numpy
@@ -357,10 +463,11 @@ def chart_histogram():
     ax.legend()
     # ax.set_axis_off()
     ax.legend().remove()
+    print("Value RGB of Chart:\nR: {}, G: {}, B: {}".format(np.max(r),np.max(g), np.max(b)))
 
-    print(np.max(r))
-    print(np.max(g))
-    print(np.max(b))
+    # print(np.max(r))
+    # print(np.max(g))
+    # print(np.max(b))
 
     # Add the canvas to the frame
     fig.patch.set_facecolor('black')
@@ -372,6 +479,9 @@ def chart_histogram():
     
 
 
+# def create_slider_bar(sliderBarName):
+
+
 
 # def lam_net()
    
@@ -381,63 +491,135 @@ def choose_filter():
     global blur_tk  
     global anh_goc
     global img_cur
+    # global label1, label2
+
+    def display_after_img():
+        global anh_goc
+        global blur_tk
+        global img_cur
+        max_size = (frame_5.winfo_width(), frame_5.winfo_height())
+        img_resize_frame_5 = resize_image(img, max_size)
+        # cập nhật ảnh đang nằm trên frame 5
+        img_cur = img_resize_frame_5
+        anh_goc = img_resize_frame_5
+        blur_tk = ImageTk.PhotoImage(img_cur)
+        x1 = frame_5.winfo_width() / 2
+        y1 = frame_5.winfo_height() / 2
+        frame_5.create_image(x1, y1, image=blur_tk, anchor="center", tags="image")
+    
+    # global label1, label2
+    # label1 = None
+    # label2 = None
+
+
+    # def test(test_case):
+    #     global label1, label2
+    #     label1 = None
+    #     label2 = None
+    #     # case 1 tạo label 1 và xóa label2
+    #     if test_case == 1:
+    #         # nếu label 1 chưa tồn tại thì tạo mới nó và xóa label2
+    #         if(label1 == None):
+    #             #tạo label 1
+    #             label1 = tk.Label(master=frame_3_child_2, text='label1')
+    #             # hiển thị nó lên frame 
+    #             label1.place(relx=0.35, rely=0.7)
+    #         # kiểm tra label 2, nếu nó đang tồn tại thì xóa nó
+    #         if(label2 != None):
+    #             label2.destroy()
+    #     if test_case == 2:
+    #         # nếu label 2 chưa tồn tại thì tạo mới nó và xóa label1
+    #         if(label2 == None):
+    #             #tạo label 1
+    #             label2 = tk.Label(master=frame_3_child_2, text='label2')
+    #             # hiển thị nó lên frame 
+    #             label2.place(relx=0.6, rely=0.7)
+
+    #         # kiểm tra label 2, nếu nó đang tồn tại thì xóa nó
+    #         if(label1 != None):
+    #             label1.destroy()
 
     if radio_var.get() == 1:
-        # Lấy ảnh gốc từ hình ảnh PIL đã chọn
         img = img_f4
         if(img is None): messagebox.showerror('Error','Chưa Tải ảnh lên!')
-        else: 
-            menu = tk.Menu(root, tearoff=0)
-            menu.add_command(label='OpenCv', command=lambda: (sliderBar_action(lam_mo_opencv2_active),chart_histogram()))
-            menu.add_command(label='Without OpenCv', command=lambda: action_02())
-            menu.post(radiobutton_1.winfo_rootx(), radiobutton_1.winfo_rooty())
         if(img is not None):
-            # Tạo một đối tượng ImageTk từ hình ảnh PIL để hiển thị trên canvas
-            max_size = (frame_5.winfo_width(), frame_5.winfo_height())
-            img_resize_frame_5 = resize_image(img, max_size)
-            # cập nhật ảnh đang nằm trên frame 5
-            img_cur = img_resize_frame_5
-            anh_goc = img_resize_frame_5
-            blur_tk = ImageTk.PhotoImage(img_cur)
-            x1 = frame_5.winfo_width() / 2
-            y1 = frame_5.winfo_height() / 2
-            frame_5.create_image(x1, y1, image=blur_tk, anchor="center", tags="image")
+           
+            menu = tk.Menu(root, tearoff=0)
+            menu.add_command(label='mo_1', command=lambda: (display_after_img(),chart_histogram(), test(1)))
+            menu.add_command(label='mo_2', command=lambda: (display_after_img(),chart_histogram(), test(2)))
+            menu.add_command(label='mo_3', command=lambda: (display_after_img(),chart_histogram(), test(3)))
+            menu.post(radiobutton_1.winfo_rootx(), radiobutton_1.winfo_rooty())
 
-        def sliderBar_action(name_func):
-            # sử dụng ảnh hiện tại để làm mờ
-            global slider_lam_mo_opencv2
-            def slider_event(value):
-                # lam_mo_opencv2_active(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
-                name_func(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
-                chart_histogram()
-            slider_lam_mo_opencv2 = slider = ctk.CTkSlider(master=frame_3_child_2,
-                                    width=160,
-                                    height=16,
-                                    border_width=5.5,
-                                    from_=0, 
-                                    to=10,
-                                    command=slider_event)
-            slider_lam_mo_opencv2.set(0)
-            slider.place(relx=0.35, rely=0.8, anchor='center')
-
-            # Tạo một Label để hiển thị giá trị của sliderbar
-            label_slider_value = tk.Label(master=frame_3_child_2, text="{}".format(slider_lam_mo_opencv2.get()), bg=COLOR_MAIN_BACKGROUND, fg='white')
-            label_slider_value.place(relx=0.8, rely=0.8, anchor='center')
-            def on_slider_change(event):
-                label_slider_value.config(text=f"{slider_lam_mo_opencv2.get()}")
-            # slider_lam_mo_opencv2.bind('<B1-Motion>', on_slider_change)
-            slider_lam_mo_opencv2.bind('<B1-Motion>',command=on_slider_change)
-
+            def test(test_case):
+                def check_and_delete(label_name, new_value=None):
+                    global global_name
+                    global_name = globals().get(label_name)
+                    if global_name is not None:
+                        global_name.destroy()
+                        global_name = None
+                    if new_value is not None:
+                        globals()[label_name] = new_value
+                    
+                global label1, label2, label3
+                # label1 = None
+                # label2 = None
+                if test_case == 1:
+                    if(label1 == None):
+                        #tạo label 1
+                        label1 = tk.Label(master=frame_3_child_2, text='label1')
+                        # hiển thị nó lên frame 
+                        label1.place(relx=0.35, rely=0.7)
+                        print(label1)
+                    # kiểm tra label 2, nếu nó đang tồn tại thì xóa nó
+                    if(label2 != None):
+                        label2.destroy()
+                        label2 = None
+                    if(label3 != None):
+                        label3.destroy()
+                        label3 = None
+                    # check_and_delete("label2")
+                    # check_and_delete("label3")
+                if test_case == 2:
+                    if(label2 == None):
+                        #tạo label 1
+                        label2 = tk.Label(master=frame_3_child_2, text='label2')
+                        # hiển thị nó lên frame 
+                        label2.place(relx=0.35, rely=0.8)
+                        print(label2)
+                    if(label1 != None):
+                        label1.destroy()
+                        label1 = None
+                    if(label3 != None):
+                        label3.destroy()
+                        label3 = None
+                    # kiểm tra label 2, nếu nó đang tồn tại thì xóa nó
+                    # check_and_delete("label1")
+                    # check_and_delete("label3")
+                if test_case == 3:
+                    if(label3 == None):
+                        #tạo label 1
+                        label3 = tk.Label(master=frame_3_child_2, text='label3')
+                        # hiển thị nó lên frame 
+                        label3.place(relx=0.35, rely=0.9)
+                        print(label3)
+                    if(label1 != None):
+                        label1.destroy()
+                        label1 = None
+                    if(label2 != None):
+                        label2.destroy()
+                        label2 = None
+                    # kiểm tra label 2, nếu nó đang tồn tại thì xóa nó
+                    # check_and_delete("label1")
+                    # check_and_delete("label2")
+            # label1 = None
+            # label2 = None
         
-        def action_02():
-            lam_mo_without_opencv2_active(anh_goc)
-
     if radio_var.get() == 2:
         # Lấy ảnh gốc từ hình ảnh PIL đã chọn
         img = img_f4
         if(img is None): messagebox.showerror('Error','Chưa Tải ảnh lên!')
         else: 
-            menu = tk.Menu(root, tearoff=0)
+            menu = tk.Menu(root, tearoff=0, cursor='man')
             menu.add_command(label='OpenCv', command=lambda: (sliderBar_action(lam_net_opencv2_active),chart_histogram()))
             menu.add_command(label='Without OpenCv', command=lambda: action_02())
             menu.post(radiobutton_2.winfo_rootx(), radiobutton_2.winfo_rooty())
@@ -452,6 +634,9 @@ def choose_filter():
             x1 = frame_5.winfo_width() / 2
             y1 = frame_5.winfo_height() / 2
             frame_5.create_image(x1, y1, image=blur_tk, anchor="center", tags="image")
+
+
+        
 
         def sliderBar_action(name_func):
             # sử dụng ảnh hiện tại để làm mờ
@@ -525,6 +710,66 @@ def choose_filter():
             slider_lam_min_opencv2.bind('<B1-Motion>', on_slider_change)
         
 
+
+        # print(radio_var.get())
+    
+    # if radio_var.get() == 2:
+    #      # Lấy ảnh gốc từ hình ảnh PIL đã chọn
+    #     img = img_f4
+    #     if(img is None): messagebox.showerror('Error','Chưa Tải ảnh lên!')
+    #     anh_xl = img
+    #     # Tạo một đối tượng ImageTk từ hình ảnh PIL để hiển thị trên canvas
+    #     max_size = (frame_5.winfo_width(), frame_5.winfo_height())
+    #     img_resize_frame_5 = resize_image(img, max_size)
+    #     blur_tk = ImageTk.PhotoImage(img_resize_frame_5)
+    #     x1_f4 = frame_5.winfo_width() / 2
+    #     y1_f4 = frame_5.winfo_height() / 2
+    #     frame_5.create_image(x1_f4, y1_f4, image=blur_tk, anchor="center", tags="image")
+    #     f_width, f_height = img.size
+    #     f_container = frame_5.create_rectangle(0, 0,f_width, f_height, width=0)
+
+    #     radio_var.trace("w", lambda name, index, mode, var=radio_var: print(var.get()))
+
+    #     global slider_lam_net 
+    #     slider_lam_net = slider =ctk.CTkSlider(master=frame_3_child_2,
+    #                              width=160,
+    #                              height=16,
+    #                              border_width=5.5)
+    #     slider.place(relx=0.5, rely=0.5, anchor='center')
+    #     # print(radio_var.get())
+
+    # if radio_var.get() == 3:
+    #      # Lấy ảnh gốc từ hình ảnh PIL đã chọn
+    #     img = img_f4
+    #     if(img is None): messagebox.showerror('Error','Chưa Tải ảnh lên!')
+    #     anh_xl = img
+    #     # Tạo một đối tượng ImageTk từ hình ảnh PIL để hiển thị trên canvas
+    #     max_size = (frame_5.winfo_width(), frame_5.winfo_height())
+    #     img_resize_frame_5 = resize_image(img, max_size)
+    #     blur_tk = ImageTk.PhotoImage(img_resize_frame_5)
+    #     x1_f4 = frame_5.winfo_width() / 2
+    #     y1_f4 = frame_5.winfo_height() / 2
+    #     frame_5.create_image(x1_f4, y1_f4, image=blur_tk, anchor="center", tags="image")
+    #     f_width, f_height = img.size
+    #     f_container = frame_5.create_rectangle(0, 0,f_width, f_height, width=0)
+
+    #     radio_var.trace("w", lambda name, index, mode, var=radio_var: print(var.get()))
+
+    #     global slider_lam_min 
+    #     slider_lam_min = slider =ctk.CTkSlider(master=frame_3_child_2,
+    #                              width=160,
+    #                              height=16,
+    #                              border_width=5.5)
+    #     slider.place(relx=0.5, rely=0.5, anchor='center')
+        # print(radio_var.get())
+
+
+# frame_5.bind('<ButtonPress-1>', lambda event:(move_from(frame_5, event), hide_image(frame_5)))
+# frame_5.bind('<B1-Motion>', lambda event:(move_to(frame_5, event), hide_image(frame_5)))
+# frame_5.bind('<MouseWheel>', lambda event:(wheel(frame_5, event), hide_image(frame_5)))  
+# frame_5.bind('<Button-4>', lambda event:wheel(frame_5, event))  
+# frame_5.bind('<Button-5>', lambda event:wheel(frame_5, event))
+  
 root.mainloop()
 
 

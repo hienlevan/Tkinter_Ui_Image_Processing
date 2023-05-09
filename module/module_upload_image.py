@@ -1,123 +1,84 @@
 
-import sys
-from PIL import ImageTk, Image
-from tkinter import filedialog
-from PIL import Image, ImageTk
+
+import tkinter as tk
+
+class App:
+    def __init__(self, root):
+        self.root = root
+        self.frame = tk.Frame(self.root)
+        self.frame.pack()
+
+        self.slider_1 = None
+        self.slider_2 = None
+
+        self.create_radiobutton()
+        self.create_menu()
+
+    # def create_radiobutton(self):
+    #     self.radiobutton_var = tk.StringVar(value="option 1")
+    #     self.radiobutton = tk.Radiobutton(self.frame, text="Select option", variable=self.radiobutton_var,
+    #                                          value="option 1", command=self.create_menu)
+    #     self.radiobutton.pack()
+    def create_radiobutton(self):
+        self.radiobutton_var = tk.StringVar(value="option 1")
+        self.radiobutton_1 = tk.Radiobutton(self.frame, text="Option 1", variable=self.radiobutton_var,
+                                                value="option 1", command=self.create_menu)
+        self.radiobutton_2 = tk.Radiobutton(self.frame, text="Option 2", variable=self.radiobutton_var,
+                                                value="option 2", command=self.create_menu)
+        self.radiobutton_1.pack()
+        self.radiobutton_2.pack()
 
 
-sys.path.append("module")
-import module_upload_image
-import module_zoom_image
-from module_zoom_image import *
+    def create_menu(self):
+        self.clear_sliders()
 
-class AutoScrollbar(ttk.Scrollbar):
-    ''' A scrollbar that hides itself if it's not needed.
-        Works only if you use the grid geometry manager '''
-    def set(self, lo, hi):
-        if float(lo) <= 0.0 and float(hi) >= 1.0:
-            self.grid_remove()
-        else:
-            self.grid()
-            ttk.Scrollbar.set(self, lo, hi)
+        option = self.radiobutton_var.get()
 
-    def pack(self, **kw):
-        raise tk.TclError('Cannot use pack with this widget')
+        if option == "option 1":
+            self.create_menu_1()
+        elif option == "option 2":
+            self.create_menu_2()
 
-    def place(self, **kw):
-        raise tk.TclError('Cannot use place with this widget')
+    def create_menu_1(self):
+        menu_1 = tk.Menu(self.root, tearoff=False)
 
-def resize_image(image, max_size):
-    # Tính tỷ lệ khung hình của ảnh và khung.
-    image_ratio = image.width / image.height
-    frame_ratio = max_size[0] / max_size[1]
-    if image.width < max_size[0] or image.height < max_size[1]:
-        if max_size[0] - image.width < max_size[1] - image.height:
-            new_width = max_size[0]
-            new_height = round(new_width / image_ratio)
-        else:
-            new_height = max_size[1]
-            new_width = round(new_height * image_ratio)
-    else:
-        if image_ratio > frame_ratio:
-            new_width = max_size[0]
-            new_height = round(new_width / image_ratio)
-        else:
-            new_height = max_size[1]
-            new_width = round(new_height * image_ratio)
-    image = image.resize((new_width, new_height), Image.ANTIALIAS)
-    return image
-
-# def upload_image(frame1, frame2):
-#     # Xóa ảnh cũ (nếu có)
-#     frame1.delete("all")
-#     frame2.delete("all")
-#     # Hiển thị hộp thoại để chọn tệp ảnh
-#     file_path = filedialog.askopenfilename()
-#     if not file_path:
-#         return
-#     # Đọc tệp ảnh và tạo một đối tượng Image
-#     image1 = Image.open(file_path)
-#     image2 = Image.open(file_path)
-#     # Thay đổi kích thước ảnh để nằm trong khung nhưng vẫn giữ được tỷ lệ ảnh
-#     max_size1 = (frame1.winfo_width(), frame1.winfo_height())
-#     image1_resize= resize_image(image1, max_size1)
-#     max_size2 = (frame2.winfo_width(), frame2.winfo_height())
-#     image2_resize= resize_image(image2, max_size2)
-#     # Tạo một đối tượng ImageTk từ đối tượng Image
-#     photo1 = ImageTk.PhotoImage(image1_resize)
-#     photo2 = ImageTk.PhotoImage(image2_resize)
-#     # Lưu trữ đối tượng photo để tránh bị xóa khỏi bộ nhớ
-#     frame1.image = photo1
-#     frame2.image = photo2
-#     # Hiển thị ảnh trên khung
-#     x1 = frame1.winfo_width() / 2
-#     y1 = frame1.winfo_height() / 2
-#     frame1.create_image(x1, y1, image=photo1, anchor="center", tags="image")
-#     x2 = frame2.winfo_width() / 2
-#     y2 = frame2.winfo_height() / 2
-#     frame2.create_image(x2, y2, image=photo2, anchor="center", tags="image")
-
-def upload_image(frame1, frame2, frame3):
-    # Xóa ảnh cũ (nếu có)
-    frame1.delete("all")
-    frame2.delete("all")
-    frame3.delete("all")
-    # Hiển thị hộp thoại để chọn tệp ảnh
-    file_path = filedialog.askopenfilename()
-    if not file_path:
-        return
-    # Đọc tệp ảnh và tạo một đối tượng Image
-    image1 = Image.open(file_path)
-    image2 = Image.open(file_path)
-    image3 = Image.open(file_path)
-    # Thay đổi kích thước ảnh để nằm trong khung nhưng vẫn giữ được tỷ lệ ảnh
-    max_size1 = (frame1.winfo_width(), frame1.winfo_height())
-    image1_resize= resize_image(image1, max_size1)
-
-    max_size2 = (frame2.winfo_width(), frame2.winfo_height())
-    image2_resize= resize_image(image2, max_size2)
-
-    max_size3 = (frame3.winfo_width(), frame3.winfo_height())
-    image3_resize= resize_image(image3, max_size3)
-    # Tạo một đối tượng ImageTk từ đối tượng Image
-    photo1 = ImageTk.PhotoImage(image1_resize)
-    photo2 = ImageTk.PhotoImage(image2_resize)
-    photo3 = ImageTk.PhotoImage(image3_resize)
-    # Lưu trữ đối tượng photo để tránh bị xóa khỏi bộ nhớ
-    frame1.image = photo1
-    frame2.image = photo2
-    frame3.image = photo3
-    # Hiển thị ảnh trên khung
-    x1 = frame1.winfo_width() / 2
-    y1 = frame1.winfo_height() / 2
-    frame1.create_image(x1, y1, image=photo1, anchor="center", tags="image")
-    
-    x2 = frame2.winfo_width() / 2
-    y2 = frame2.winfo_height() / 2
-    frame2.create_image(x2, y2, image=photo2, anchor="center", tags="image")
-
-    x3 = frame3.winfo_width() / 2
-    y3 = frame3.winfo_height() / 2
-    frame3.create_image(x3, y3, image=photo3, anchor="center", tags="image")
+        slider_1 = tk.Scale(self.frame, from_=0, to=100, orient="horizontal")
+        slider_1.pack()
+        slider_1.place(relx=0.5, rely=0.5, anchor="center")
 
 
+        menu_1.add_command(label="Slider 1", command=lambda: slider_1.lift())
+        menu_1.add_command(label="Exit", command=self.clear_sliders)
+
+        self.slider_1 = slider_1
+
+        self.root.config(menu=menu_1)
+
+    def create_menu_2(self):
+        menu_2 = tk.Menu(self.root, tearoff=False)
+
+        slider_2 = tk.Scale(self.frame, from_=0, to=100, orient="vertical")
+        slider_2.pack()
+        slider_2.place(relx=0.5, rely=0.8, anchor="center")
+
+        menu_2.add_command(label="Slider 2", command=lambda: slider_2.lift())
+        menu_2.add_command(label="Exit", command=self.clear_sliders)
+
+        self.slider_2 = slider_2
+
+        self.root.config(menu=menu_2)
+
+    def clear_sliders(self):
+        if self.slider_1:
+            self.slider_1.destroy()
+            self.slider_1 = None
+
+        if self.slider_2:
+            self.slider_2.destroy()
+            self.slider_2 = None
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.geometry('300x300')
+    app = App(root)
+    root.mainloop()
