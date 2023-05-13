@@ -11,19 +11,18 @@ import numpy as np
 sys.path.append("module")
 from define import *
 
-# global label1, label2, label3
-# label1 = None
-# label2 = None
-# label3 = None
-
-
 # Chức năng làm mờ, gồm có: ... sliderbar
-global slider_lam_mo_kernel_gaussian_ksize, slider_lam_mo_kernel_gaussian_sigma, slider_lam_mo_kernel_blur, slider_lam_mo_kernel_median
+global slider_lam_mo_kernel_gaussian_ksize, slider_lam_mo_kernel_gaussian_sigma, slider_lam_mo_kernel_blur, slider_lam_mo_kernel_median, slider_lam_mo_kernel_motion
 slider_lam_mo_kernel_gaussian_ksize = None
 slider_lam_mo_kernel_gaussian_sigma = None
 slider_lam_mo_kernel_blur = None
 slider_lam_mo_kernel_median = None
+slider_lam_mo_kernel_motion = None
 
+global slider_lam_mo_bilateralFilter_diameter, slider_lam_mo_bilateralFilter_sigmaColor, slider_lam_mo_bilateralFilter_sigmaSpace
+slider_lam_mo_bilateralFilter_diameter = None
+slider_lam_mo_bilateralFilter_sigmaColor = None
+slider_lam_mo_bilateralFilter_sigmaSpace = None
 
 # Chức năng thay đổi độ tương phản, gồm có: ... sliderbar
 global slider_tuong_phan_logarit, slider_tuong_phan_unsharp_mask
@@ -35,9 +34,9 @@ global slider_lam_min_median
 slider_lam_min_median = None
 
 # Chức năng tăng giảm sáng, gồm có: ... sliderbar
-global slider_tang_giam_sang_
-slider_lam_min_median = None
-
+global slider_contrast_stretching, slider_linear_blending
+slider_contrast_stretching = None
+slider_linear_blending = None
 
 
 # Ảnh hiển thị trên khung ảnh bên trái có label "Before"
@@ -159,6 +158,7 @@ radiobutton_1 = ctk.CTkRadioButton(master=frame_3_child_2, text="Làm mờ",vari
 radiobutton_2 = ctk.CTkRadioButton(master=frame_3_child_2, text="Thay đổi độ tương phản", variable=radio_var, value=2, font=FONT_CHOOSE, command=lambda:choose_filter())
 radiobutton_3 = ctk.CTkRadioButton(master=frame_3_child_2, text="Làm mịn và giảm nhiễu", variable=radio_var, value=3, font=FONT_CHOOSE, command=lambda:choose_filter())
 radiobutton_4 = ctk.CTkRadioButton(master=frame_3_child_2, text="Tăng giảm sáng", variable=radio_var, value=4, font=FONT_CHOOSE, command=lambda:choose_filter())
+
 
 # radio_var.trace("w", lambda name, index, mode, var=radio_var: print("Current Radio Button Value: {}".format(var.get())))
 
@@ -319,74 +319,7 @@ def chart_histogram():
     canvas.draw()
 
 
-# def check_and_delete(label_name, new_value=None):
-#     # Save the current value of the global variable
-#     old_value = globals().get(label_name)
-    
-#     # Check if the global variable exists and delete it
-#     if old_value is not None:
-#         old_value.destroy()
-        
-#     # If a new value is provided, set it as the new global variable
-#     if new_value is not None:
-#         globals()[label_name] = new_value 
-    
-#     # Set the value of the global variable to None after the function is called
-#     globals()[label_name] = None
-    
-#     print(label_name + ": " + str(globals()[label_name]))
-#     # Return the old value of the global variable
-#     return old_value
-#     # global_name = old_value
 
-# def test(test_case):
-#     global label1, label2, label3
-#     # label1 = None
-#     # label2 = None
-   
-#     if test_case == 1:
-#         if(label1 is not None):
-#             return
-#         if(label1 is None):
-#             #tạo label 1
-#             label1 = tk.Label(master=frame_3_child_2, text='label số 1')
-#             # hiển thị nó lên frame 
-#             label1.place(relx=0.35, rely=0.7)
-#             print("label1: " + str(label1))
-#         # if(label1 is not None):
-#         #     return
-#         if label2 is not None:
-#             check_and_delete("label2", None)
-    
-#         if label3 is not None:
-#             check_and_delete("label3", None)
-
-#     if test_case == 2:
-#         if(label2 == None):
-#             #tạo label 1
-#             label2 = tk.Label(master=frame_3_child_2, text='label số 2')
-#             # hiển thị nó lên frame 
-#             label2.place(relx=0.35, rely=0.8)
-#             print("label2: " + str(label2))
-
-#         if label1 is not None:
-#             check_and_delete("label1", None)
-    
-#         if label3 is not None:
-#             check_and_delete("label3", None)
-
-#     if test_case == 3:
-#         if(label3 == None):
-#             #tạo label 1
-#             label3 = tk.Label(master=frame_3_child_2, text='label số 3')
-#             # hiển thị nó lên frame 
-#             label3.place(relx=0.35, rely=0.9)
-#             print("label3: " + str(label3))
-#         if label1 is not None:
-#             check_and_delete("label1", None)
-    
-#         if label2 is not None:
-#             check_and_delete("label2", None)
 
 # Hàm dùng để ẩn đi slider bar khi người dùng chọn một chức năng mới
 def check_and_delete_slider(slider_name, new_value=None):
@@ -412,9 +345,13 @@ def check_and_delete_slider(slider_name, new_value=None):
 
 # Hàm gọi các phép làm mờ
 def call_lam_mo(case):
-    global slider_lam_mo_kernel_gaussian_ksize, slider_lam_mo_kernel_gaussian_sigma, slider_lam_mo_kernel_blur, slider_lam_mo_kernel_median 
+    global slider_lam_mo_kernel_gaussian_ksize, slider_lam_mo_kernel_gaussian_sigma, slider_lam_mo_kernel_blur, slider_lam_mo_kernel_median, slider_lam_mo_kernel_motion 
+
+    global slider_lam_mo_bilateralFilter_diameter, slider_lam_mo_bilateralFilter_sigmaColor, slider_lam_mo_bilateralFilter_sigmaSpace
     global slider_tuong_phan_logarit, slider_tuong_phan_unsharp_mask
     global slider_lam_min_median
+
+    global slider_contrast_stretching, slider_linear_blending
 
     # Hàm gọi các phép làm mờ chỉ có 
     # một giá trị cần thay đổi trên sliderbar 
@@ -433,6 +370,16 @@ def call_lam_mo(case):
                 print("{} - value Of Kernel Size: {}, value Of Sigma: {}\n{}".format(name_func,int(value_1), value_2, "="*55))
                 # print("value sigma: {}".format(value_2))           
                 name_func(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value_1, value_2)
+                chart_histogram()
+
+    # Hàm gọi các phép làm mờ có 
+    # ba giá trị cần thay đổi trên sliderbar 
+    def slider_three_event(name_func,value_1, value_2, value_3):
+                # clear terminal
+                os.system('cls')
+                print("{} - value Of diameter: {}, value Of sigmaColor: {}, value Of sigmaSpace: {}\n{}".format(name_func,int(value_1), int(value_2), int(value_3), "="*70))
+                # print("value sigma: {}".format(value_2))           
+                name_func(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value_1, value_2, value_3)
                 chart_histogram()
 
     # Lựa chọn Popup thứ nhất của Radio-Button làm mờ - "Kernel Gaussian"
@@ -469,6 +416,17 @@ def call_lam_mo(case):
         if slider_lam_mo_kernel_median is not None:
             check_and_delete_slider("slider_lam_mo_kernel_median", None)
 
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 4
+        if slider_lam_mo_bilateralFilter_diameter is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_diameter", None)
+        if slider_lam_mo_bilateralFilter_sigmaColor is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaColor", None)
+        if slider_lam_mo_bilateralFilter_sigmaSpace is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaSpace", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 5
+        if slider_lam_mo_kernel_motion is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_motion", None)
+
         # Ẩn các thanh sliderbar của chức năng thay đổi độ tương phản
         if slider_tuong_phan_logarit is not None:
             check_and_delete_slider("slider_tuong_phan_logarit", None)
@@ -479,6 +437,13 @@ def call_lam_mo(case):
         if slider_lam_min_median is not None:
             check_and_delete_slider("slider_lam_min_median", None)
 
+        # Ẩn các thanh sliderbar của chức năng thay đổi sáng
+        if slider_contrast_stretching is not None:
+            check_and_delete_slider("slider_contrast_stretching", None)
+        if slider_linear_blending is not None:
+            check_and_delete_slider("slider_linear_blending", None)
+
+
     if(case == 2):
         if(slider_lam_mo_kernel_blur is None):
             slider_lam_mo_kernel_blur = slider = ctk.CTkSlider(master=frame_3_child_2,
@@ -486,7 +451,7 @@ def call_lam_mo(case):
                                     height=16,
                                     border_width=5.5,
                                     from_=0, 
-                                    to=10,
+                                    to=20,
                                     command=lambda value: slider_one_event(lam_mo_kernel_blur_active, value)
                                     )
             slider_lam_mo_kernel_blur.set(0)
@@ -500,8 +465,18 @@ def call_lam_mo(case):
         # Ẩn các thanh sliderbar của phép làm mờ thứ 3
         if slider_lam_mo_kernel_median is not None:
             check_and_delete_slider("slider_lam_mo_kernel_median", None)
-        
 
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 4
+        if slider_lam_mo_bilateralFilter_diameter is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_diameter", None)
+        if slider_lam_mo_bilateralFilter_sigmaColor is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaColor", None)
+        if slider_lam_mo_bilateralFilter_sigmaSpace is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaSpace", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 5
+        if slider_lam_mo_kernel_motion is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_motion", None)
+        
         # Ẩn các thanh sliderbar của chức năng thay đổi độ tương phản
         if slider_tuong_phan_logarit is not None:
             check_and_delete_slider("slider_tuong_phan_logarit", None)
@@ -511,6 +486,13 @@ def call_lam_mo(case):
         # Ẩn các thanh sliderbar của chức năng làm mịn
         if slider_lam_min_median is not None:
             check_and_delete_slider("slider_lam_min_median", None)
+
+        # Ẩn các thanh sliderbar của chức năng thay đổi sáng
+        if slider_contrast_stretching is not None:
+            check_and_delete_slider("slider_contrast_stretching", None)
+        if slider_linear_blending is not None:
+            check_and_delete_slider("slider_linear_blending", None)
+
     if(case == 3):
         if(slider_lam_mo_kernel_median is None):
             slider_lam_mo_kernel_median = slider = ctk.CTkSlider(master=frame_3_child_2,
@@ -518,7 +500,7 @@ def call_lam_mo(case):
                                     height=16,
                                     border_width=5.5,
                                     from_=0, 
-                                    to=10,
+                                    to=20,
                                     command=lambda value: slider_one_event(lam_mo_kernel_median_active, value)
                                     )
             slider_lam_mo_kernel_median.set(0)
@@ -532,8 +514,19 @@ def call_lam_mo(case):
         # Ẩn các thanh sliderbar của phép làm mờ thứ 2
         if slider_lam_mo_kernel_blur is not None:
             check_and_delete_slider("slider_lam_mo_kernel_blur", None)
-        
 
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 4
+        if slider_lam_mo_bilateralFilter_diameter is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_diameter", None)
+        if slider_lam_mo_bilateralFilter_sigmaColor is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaColor", None)
+        if slider_lam_mo_bilateralFilter_sigmaSpace is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaSpace", None)
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 5
+        if slider_lam_mo_kernel_motion is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_motion", None)
+        
         # Ẩn các thanh sliderbar của chức năng thay đổi độ tương phản
         if slider_tuong_phan_logarit is not None:
             check_and_delete_slider("slider_tuong_phan_logarit", None)
@@ -544,9 +537,157 @@ def call_lam_mo(case):
         if slider_lam_min_median is not None:
             check_and_delete_slider("slider_lam_min_median", None)
 
-    
+        # Ẩn các thanh sliderbar của chức năng thay đổi sáng
+        if slider_contrast_stretching is not None:
+            check_and_delete_slider("slider_contrast_stretching", None)
+        if slider_linear_blending is not None:
+            check_and_delete_slider("slider_linear_blending", None)
+
+
+    if(case == 4):
+        if(slider_lam_mo_bilateralFilter_diameter is None or slider_lam_mo_bilateralFilter_sigmaColor is None or slider_lam_mo_bilateralFilter_sigmaSpace is None):
+            slider_lam_mo_bilateralFilter_diameter = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=200,
+                                    )
+            slider_lam_mo_bilateralFilter_diameter.set(0)
+            slider_lam_mo_bilateralFilter_diameter.place(relx=0.35, rely=0.7, anchor='center')
             
+            slider_lam_mo_bilateralFilter_sigmaColor = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=200,
+                                    )
+            slider_lam_mo_bilateralFilter_sigmaColor.set(0)
+            slider_lam_mo_bilateralFilter_sigmaColor.place(relx=0.35, rely=0.8, anchor='center')
+
+            slider_lam_mo_bilateralFilter_sigmaSpace = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=300,
+                                    )
+            slider_lam_mo_bilateralFilter_sigmaSpace.set(0)
+            slider_lam_mo_bilateralFilter_sigmaSpace.place(relx=0.35, rely=0.9, anchor='center')
+           
+            slider_lam_mo_bilateralFilter_diameter.bind('<Button-1>', lambda event: slider_three_event(lam_mo_bilateralFilter_active, slider_lam_mo_bilateralFilter_diameter.get(), slider_lam_mo_bilateralFilter_sigmaColor.get(), slider_lam_mo_bilateralFilter_sigmaSpace.get()))
+
+            slider_lam_mo_bilateralFilter_sigmaColor.bind('<Button-1>', lambda event: slider_three_event(lam_mo_bilateralFilter_active, slider_lam_mo_bilateralFilter_diameter.get(), slider_lam_mo_bilateralFilter_sigmaColor.get(), slider_lam_mo_bilateralFilter_sigmaSpace.get()))
+
+            slider_lam_mo_bilateralFilter_sigmaSpace.bind('<Button-1>', lambda event: slider_three_event(lam_mo_bilateralFilter_active, slider_lam_mo_bilateralFilter_diameter.get(), slider_lam_mo_bilateralFilter_sigmaColor.get(), slider_lam_mo_bilateralFilter_sigmaSpace.get()))
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ nhất
+        if slider_lam_mo_kernel_gaussian_ksize is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_gaussian_ksize", None)
+        if slider_lam_mo_kernel_gaussian_sigma is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_gaussian_sigma", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 2
+        if slider_lam_mo_kernel_blur is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_blur", None)
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 3
+        if slider_lam_mo_kernel_median is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_median", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 5
+        if slider_lam_mo_kernel_motion is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_motion", None)
+        
+        # Ẩn các thanh sliderbar của chức năng thay đổi độ tương phản
+        if slider_tuong_phan_logarit is not None:
+            check_and_delete_slider("slider_tuong_phan_logarit", None)
+        if slider_tuong_phan_unsharp_mask is not None:
+            check_and_delete_slider("slider_tuong_phan_unsharp_mask", None)
+
+        # Ẩn các thanh sliderbar của chức năng làm mịn
+        if slider_lam_min_median is not None:
+            check_and_delete_slider("slider_lam_min_median", None)
+        
+        # Ẩn các thanh sliderbar của chức năng thay đổi sáng
+        if slider_contrast_stretching is not None:
+            check_and_delete_slider("slider_contrast_stretching", None)
+        if slider_linear_blending is not None:
+            check_and_delete_slider("slider_linear_blending", None)
+
+    if(case == 5):
+        if(slider_lam_mo_kernel_motion is None):
+            slider_lam_mo_kernel_motion = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=30,
+                                    command=lambda value: slider_one_event(lam_mo_kernel_motion_active, value)
+                                    )
+            slider_lam_mo_kernel_motion.set(0)
+            slider_lam_mo_kernel_motion.place(relx=0.35, rely=0.8, anchor='center')
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ nhất
+        if slider_lam_mo_kernel_gaussian_ksize is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_gaussian_ksize", None)
+        if slider_lam_mo_kernel_gaussian_sigma is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_gaussian_sigma", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 2
+        if slider_lam_mo_kernel_blur is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_blur", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 3
+        if slider_lam_mo_kernel_median is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_median", None)
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 4
+        if slider_lam_mo_bilateralFilter_diameter is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_diameter", None)
+        if slider_lam_mo_bilateralFilter_sigmaColor is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaColor", None)
+        if slider_lam_mo_bilateralFilter_sigmaSpace is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaSpace", None)
+        
+        # Ẩn các thanh sliderbar của chức năng thay đổi độ tương phản
+        if slider_tuong_phan_logarit is not None:
+            check_and_delete_slider("slider_tuong_phan_logarit", None)
+        if slider_tuong_phan_unsharp_mask is not None:
+            check_and_delete_slider("slider_tuong_phan_unsharp_mask", None)
+
+        # Ẩn các thanh sliderbar của chức năng làm mịn
+        if slider_lam_min_median is not None:
+            check_and_delete_slider("slider_lam_min_median", None)
+        
+        # Ẩn các thanh sliderbar của chức năng thay đổi sáng
+        if slider_contrast_stretching is not None:
+            check_and_delete_slider("slider_contrast_stretching", None)
+        if slider_linear_blending is not None:
+            check_and_delete_slider("slider_linear_blending", None)
+
+        
+
+          
+      
 # Các Function thực hiện các phép làm mờ
+
+
+def lam_mo_bilateralFilter_active(image,diameter,sigmaColor,sigmaSpace):
+    global img_kq
+    img_kq = lam_mo_bilateralFilter(image,diameter,sigmaColor,sigmaSpace)
+    update_(frame_5,img_kq)
+
+def lam_mo_bilateralFilter(image, diameter, sigmaColor, sigmaSpace):
+    global img_cur
+
+    diameter = int(diameter)
+    sigmaColor = int(sigmaColor)
+    sigmaSpace = int(sigmaSpace)
+    #Bilateral is very effective in noise removal while keeping the edges sharp
+    bilateral=cv2.bilateralFilter(image,diameter,sigmaColor,sigmaSpace)
+    img_temp1 = Image.fromarray(cv2.cvtColor(bilateral, cv2.COLOR_BGR2RGB))
+    # cập nhật ảnh trên frame 5
+    img_cur = img_temp1
+    return img_temp1
+
 def lam_mo_kernel_gaussian_active(image,ksize,sigma):
     global img_kq
     img_kq = lam_mo_kernel_gaussian(image,ksize,sigma)
@@ -604,14 +745,39 @@ def lam_mo_kernel_median(image, ksize):
     img_cur = img_temp1
     return img_temp1
 
+def lam_mo_kernel_motion_active(image, ksize):
+    global img_kq
+    img_kq = lam_mo_kernel_motion(image,ksize)
+    update_(frame_5,img_kq)
+
+def lam_mo_kernel_motion(image, ksize):
+    global img_cur
+    ksize = int(ksize)
+    # generating the kernel
+    kernel_motion_blur = np.zeros((ksize, ksize))
+    kernel_motion_blur[int((ksize-1)/2), :] = np.ones(ksize)
+    kernel_motion_blur = kernel_motion_blur / ksize
+
+    # applying the kernel to the input image
+    output = cv2.filter2D(image, -1, kernel_motion_blur)
+    img_temp1 = Image.fromarray(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+    # cập nhật ảnh trên frame 5
+    img_cur = img_temp1
+    return img_temp1
+
 
 
 ###
 # Hàm gọi các phép thay đổi độ tương phản 
 def call_tuong_phan(case):
-    global slider_lam_mo_kernel_gaussian_ksize, slider_lam_mo_kernel_gaussian_sigma, slider_lam_mo_kernel_blur, slider_lam_mo_kernel_median 
+    global slider_lam_mo_kernel_gaussian_ksize, slider_lam_mo_kernel_gaussian_sigma, slider_lam_mo_kernel_blur, slider_lam_mo_kernel_median, slider_lam_mo_kernel_motion 
+
+    global slider_lam_mo_bilateralFilter_diameter, slider_lam_mo_bilateralFilter_sigmaColor, slider_lam_mo_bilateralFilter_sigmaSpace
+
     global slider_tuong_phan_logarit, slider_tuong_phan_unsharp_mask
     global slider_lam_min_median
+
+    global slider_contrast_stretching, slider_linear_blending
 
     def slider_event(name_func,value):
                 os.system('cls')
@@ -631,18 +797,28 @@ def call_tuong_phan(case):
             slider_tuong_phan_logarit.set(0)
             slider_tuong_phan_logarit.place(relx=0.35, rely=0.8, anchor='center')
 
-        # Ẩn các thanh sliderbar của chức năng làm mờ
+        # Ẩn các thanh sliderbar của phép làm mờ thứ nhất
         if slider_lam_mo_kernel_gaussian_ksize is not None:
             check_and_delete_slider("slider_lam_mo_kernel_gaussian_ksize", None)
-
         if slider_lam_mo_kernel_gaussian_sigma is not None:
             check_and_delete_slider("slider_lam_mo_kernel_gaussian_sigma", None)
-
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 2
         if slider_lam_mo_kernel_blur is not None:
             check_and_delete_slider("slider_lam_mo_kernel_blur", None)
-
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 3
         if slider_lam_mo_kernel_median is not None:
             check_and_delete_slider("slider_lam_mo_kernel_median", None)
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 4
+        if slider_lam_mo_bilateralFilter_diameter is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_diameter", None)
+        if slider_lam_mo_bilateralFilter_sigmaColor is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaColor", None)
+        if slider_lam_mo_bilateralFilter_sigmaSpace is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaSpace", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 5
+        if slider_lam_mo_kernel_motion is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_motion", None)
 
         # Ẩn các thanh sliderbar của phép thay đổi độ tương phản thứ 2
         if slider_tuong_phan_unsharp_mask is not None:
@@ -651,6 +827,13 @@ def call_tuong_phan(case):
         # Ẩn các thanh sliderbar của chức năng làm mịn
         if slider_lam_min_median is not None:
             check_and_delete_slider("slider_lam_min_median", None)
+
+        # Ẩn các thanh sliderbar của chức năng thay đổi sáng
+        if slider_contrast_stretching is not None:
+            check_and_delete_slider("slider_contrast_stretching", None)
+        if slider_linear_blending is not None:
+            check_and_delete_slider("slider_linear_blending", None)
+
 
     if(case == 2):
         if(slider_tuong_phan_unsharp_mask is None):
@@ -665,15 +848,26 @@ def call_tuong_phan(case):
             slider_tuong_phan_unsharp_mask.set(0)
             slider_tuong_phan_unsharp_mask.place(relx=0.35, rely=0.8, anchor='center')
 
-        # Ẩn các thanh sliderbar của chức năng làm mờ
+        # Ẩn các thanh sliderbar của phép làm mờ thứ nhất
         if slider_lam_mo_kernel_gaussian_ksize is not None:
             check_and_delete_slider("slider_lam_mo_kernel_gaussian_ksize", None)
         if slider_lam_mo_kernel_gaussian_sigma is not None:
             check_and_delete_slider("slider_lam_mo_kernel_gaussian_sigma", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 2
         if slider_lam_mo_kernel_blur is not None:
             check_and_delete_slider("slider_lam_mo_kernel_blur", None)
+        
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 3
         if slider_lam_mo_kernel_median is not None:
             check_and_delete_slider("slider_lam_mo_kernel_median", None)
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 4
+        if slider_lam_mo_bilateralFilter_diameter is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_diameter", None)
+        if slider_lam_mo_bilateralFilter_sigmaColor is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaColor", None)
+        if slider_lam_mo_bilateralFilter_sigmaSpace is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaSpace", None)
         
         # Ẩn các thanh sliderbar phép thay đổi độ tương phản thứ nhất
         if slider_tuong_phan_logarit is not None:
@@ -682,6 +876,13 @@ def call_tuong_phan(case):
         # Ẩn các thanh sliderbar của chức năng làm mịn
         if slider_lam_min_median is not None:
             check_and_delete_slider("slider_lam_min_median", None)
+
+        # Ẩn các thanh sliderbar của chức năng thay đổi sáng
+        if slider_contrast_stretching is not None:
+            check_and_delete_slider("slider_contrast_stretching", None)
+        if slider_linear_blending is not None:
+            check_and_delete_slider("slider_linear_blending", None)
+
     
 def tuong_phan_logarit_active(img, c):
     global img_kq
@@ -723,35 +924,16 @@ def tuong_phan_unsharp_mask(img, amount):
     img_temp1 = Image.fromarray(cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB))
     img_cur = img_temp1
     return img_temp1
-# def lam_net_opencv2_active(img, amount):
-#     global img_kq
-#     img_kq = lam_net_opencv2(img, amount)
-#     update_(frame_5, img_kq)
-
-# def lam_net_opencv2(img, amount):
-#     global img_cur
-#     global blurred
-#     global sharpened
-#     kernel_size =(5, 5)
-#     sigma=1.0
-#     threshold=0
-#     # """Return a sharpened version of the image, using an unsharp mask."""
-#     blurred = cv2.GaussianBlur(img, kernel_size, sigma)
-#     sharpened = float(amount + 1) * img - float(amount) * blurred
-#     sharpened = np.maximum(sharpened, np.zeros(sharpened.shape))
-#     sharpened = np.minimum(sharpened, 255 * np.ones(sharpened.shape))
-#     sharpened = sharpened.round().astype(np.uint8)
-#     if threshold > 0:
-#         low_contrast_mask = np.absolute(img - blurred) < threshold
-#         np.copyto(sharpened, img, where=low_contrast_mask)
-#     img_temp1 = Image.fromarray(cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB))
-#     img_cur = img_temp1
-#     return img_temp1
 
 def call_lam_min(case):
-    global slider_lam_mo_kernel_gaussian_ksize, slider_lam_mo_kernel_gaussian_sigma,slider_lam_mo_kernel_blur
+    global slider_lam_mo_kernel_gaussian_ksize, slider_lam_mo_kernel_gaussian_sigma, slider_lam_mo_kernel_blur, slider_lam_mo_kernel_median, slider_lam_mo_kernel_motion 
+
+    global slider_lam_mo_bilateralFilter_diameter, slider_lam_mo_bilateralFilter_sigmaColor, slider_lam_mo_bilateralFilter_sigmaSpace
+
     global slider_tuong_phan_logarit, slider_tuong_phan_unsharp_mask
     global slider_lam_min_median
+
+    global slider_contrast_stretching
 
     def slider_event(name_func,value):
                 os.system('cls')
@@ -771,21 +953,41 @@ def call_lam_min(case):
             slider_lam_min_median.set(0)
             slider_lam_min_median.place(relx=0.35, rely=0.8, anchor='center')
 
-        # Ẩn các thanh sliderbar của chức năng làm mờ
+        # Ẩn các thanh sliderbar của phép làm mờ thứ nhất
         if slider_lam_mo_kernel_gaussian_ksize is not None:
             check_and_delete_slider("slider_lam_mo_kernel_gaussian_ksize", None)
         if slider_lam_mo_kernel_gaussian_sigma is not None:
             check_and_delete_slider("slider_lam_mo_kernel_gaussian_sigma", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 2
         if slider_lam_mo_kernel_blur is not None:
             check_and_delete_slider("slider_lam_mo_kernel_blur", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 3
         if slider_lam_mo_kernel_median is not None:
             check_and_delete_slider("slider_lam_mo_kernel_median", None)
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 4
+        if slider_lam_mo_bilateralFilter_diameter is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_diameter", None)
+        if slider_lam_mo_bilateralFilter_sigmaColor is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaColor", None)
+        if slider_lam_mo_bilateralFilter_sigmaSpace is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaSpace", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 5
+        if slider_lam_mo_kernel_motion is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_motion", None)
 
         # Ẩn các thanh sliderbar của chức năng thay đổi độ tương phản
         if slider_tuong_phan_logarit is not None:
             check_and_delete_slider("slider_tuong_phan_logarit", None)
         if slider_tuong_phan_unsharp_mask is not None:
             check_and_delete_slider("slider_tuong_phan_unsharp_mask", None)
+
+        # Ẩn các thanh sliderbar của chức năng thay đổi sáng
+        if slider_contrast_stretching is not None:
+            check_and_delete_slider("slider_contrast_stretching", None)
+        if slider_linear_blending is not None:
+            check_and_delete_slider("slider_linear_blending", None)
+
 
 def lam_min_median_active(img, sigma):
     global img_kq
@@ -809,6 +1011,152 @@ def lam_min_median(img, sigma):
         img_temp1 = Image.fromarray(cv2.cvtColor(filtered_image, cv2.COLOR_BGR2RGB))
         img_cur = img_temp1
         return img_temp1
+    
+
+def call_thay_doi_sang(case):
+    global slider_lam_mo_kernel_gaussian_ksize, slider_lam_mo_kernel_gaussian_sigma, slider_lam_mo_kernel_blur, slider_lam_mo_kernel_median, slider_lam_mo_kernel_motion 
+
+    global slider_lam_mo_bilateralFilter_diameter, slider_lam_mo_bilateralFilter_sigmaColor, slider_lam_mo_bilateralFilter_sigmaSpace
+
+    global slider_tuong_phan_logarit, slider_tuong_phan_unsharp_mask
+    global slider_lam_min_median
+    
+    global slider_contrast_stretching, slider_linear_blending
+
+    def slider_event(name_func,value):
+                os.system('cls')
+                print("{} - value Of Kernel Size: {}\n{}".format(name_func,int(value), "="*25))
+                name_func(cv2.cvtColor(np.array(anh_goc), cv2.COLOR_BGR2RGB),value)
+                chart_histogram()
+    if(case == 1):
+        if(slider_contrast_stretching is None):
+            slider_contrast_stretching = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=20,
+                                    command=lambda value: slider_event(contrast_stretching_active, value)
+                                    )
+            slider_contrast_stretching.set(0)
+            slider_contrast_stretching.place(relx=0.35, rely=0.8, anchor='center')
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ nhất
+        if slider_lam_mo_kernel_gaussian_ksize is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_gaussian_ksize", None)
+        if slider_lam_mo_kernel_gaussian_sigma is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_gaussian_sigma", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 2
+        if slider_lam_mo_kernel_blur is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_blur", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 3
+        if slider_lam_mo_kernel_median is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_median", None)
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 4
+        if slider_lam_mo_bilateralFilter_diameter is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_diameter", None)
+        if slider_lam_mo_bilateralFilter_sigmaColor is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaColor", None)
+        if slider_lam_mo_bilateralFilter_sigmaSpace is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaSpace", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 5
+        if slider_lam_mo_kernel_motion is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_motion", None)
+
+        # Ẩn các thanh sliderbar của chức năng thay đổi độ tương phản
+        if slider_tuong_phan_logarit is not None:
+            check_and_delete_slider("slider_tuong_phan_logarit", None)
+        if slider_tuong_phan_unsharp_mask is not None:
+            check_and_delete_slider("slider_tuong_phan_unsharp_mask", None)
+
+        # Ẩn các thanh sliderbar của chức năng làm mịn
+        if slider_lam_min_median is not None:
+            check_and_delete_slider("slider_lam_min_median", None)
+
+        if slider_linear_blending is not None:
+            check_and_delete_slider("slider_linear_blending", None)
+
+    if(case == 2):
+        if(slider_linear_blending is None):
+            slider_linear_blending = slider = ctk.CTkSlider(master=frame_3_child_2,
+                                    width=160,
+                                    height=16,
+                                    border_width=5.5,
+                                    from_=0, 
+                                    to=100,
+                                    command=lambda value: slider_event(linear_blending_active, value)
+                                    )
+            slider_linear_blending.set(0)
+            slider_linear_blending.place(relx=0.35, rely=0.8, anchor='center')
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ nhất
+        if slider_lam_mo_kernel_gaussian_ksize is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_gaussian_ksize", None)
+        if slider_lam_mo_kernel_gaussian_sigma is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_gaussian_sigma", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 2
+        if slider_lam_mo_kernel_blur is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_blur", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 3
+        if slider_lam_mo_kernel_median is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_median", None)
+
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 4
+        if slider_lam_mo_bilateralFilter_diameter is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_diameter", None)
+        if slider_lam_mo_bilateralFilter_sigmaColor is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaColor", None)
+        if slider_lam_mo_bilateralFilter_sigmaSpace is not None:
+            check_and_delete_slider("slider_lam_mo_bilateralFilter_sigmaSpace", None)
+        # Ẩn các thanh sliderbar của phép làm mờ thứ 5
+        if slider_lam_mo_kernel_motion is not None:
+            check_and_delete_slider("slider_lam_mo_kernel_motion", None)
+
+        # Ẩn các thanh sliderbar của chức năng thay đổi độ tương phản
+        if slider_tuong_phan_logarit is not None:
+            check_and_delete_slider("slider_tuong_phan_logarit", None)
+        if slider_tuong_phan_unsharp_mask is not None:
+            check_and_delete_slider("slider_tuong_phan_unsharp_mask", None)
+
+        # Ẩn các thanh sliderbar của chức năng làm mịn
+        if slider_lam_min_median is not None:
+            check_and_delete_slider("slider_lam_min_median", None)
+
+        if slider_contrast_stretching is not None:
+            check_and_delete_slider("slider_contrast_stretching", None)
+
+
+def contrast_stretching_active(img, beta):
+    global img_kq
+    img_kq = contrast_stretching(img, beta)
+    update_(frame_5, img_kq)
+def contrast_stretching(img, beta):
+    global img_cur
+    # define the alpha and beta
+    alpha = 1.5 # Contrast control
+    # call convertScaleAbs function
+    adjusted = cv2.convertScaleAbs(img, alpha, beta)
+    img_temp1 = Image.fromarray(cv2.cvtColor(adjusted, cv2.COLOR_BGR2RGB))
+    img_cur = img_temp1
+    return img_temp1
+
+def linear_blending_active(img, brightness):
+    global img_kq
+    img_kq = linear_blending(img, brightness)
+    update_(frame_5, img_kq)
+
+def linear_blending(img, brightness):
+    global img_cur
+    contrast = 2. # Contrast control ( 0 to 127)
+    # brightness = 2. # Brightness control (0-100)
+    # call addWeighted function. use beta = 0 to effectively only
+    # operate on one image
+    out = cv2.addWeighted( img, contrast, img, 0, brightness)
+    img_temp1 = Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB))
+    img_cur = img_temp1
+    return img_temp1
+
 
 
 # Hàm chọn chức năng - Radio-Button và gọi các 
@@ -840,9 +1188,12 @@ def choose_filter():
         if(img is not None):
             os.system('cls');print("Bạn đang chọn chức năng: Làm mờ :)")
             menu = tk.Menu(root, tearoff=0)
-            menu.add_command(label='Kernel Gaussian', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(1)))
-            menu.add_command(label='Kernel Blur', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(2)))
-            menu.add_command(label='Kernel Median', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(3)))
+            menu.add_command(label='Gaussian Blurring', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(1)))
+            menu.add_command(label='Blur Averaging Method of Blurring', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(2)))
+            menu.add_command(label='Median Blurring', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(3)))
+            menu.add_command(label='Bilateral Blurring', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(4)))
+            menu.add_command(label='Motion Blurring', command=lambda: (display_after_img(),chart_histogram(), call_lam_mo(5)))
+
             menu.post(radiobutton_1.winfo_rootx(), radiobutton_1.winfo_rooty())
 
     if radio_var.get() == 2:
@@ -870,8 +1221,9 @@ def choose_filter():
         if(img is not None):
             os.system('cls');print("Bạn đang chọn chức năng: Tăng giảm sáng :)")
             menu = tk.Menu(root, tearoff=0)
-            menu.add_command(label='Median', command=lambda: (display_after_img(),chart_histogram(), call_lam_min(1)))
-            menu.post(radiobutton_3.winfo_rootx(), radiobutton_3.winfo_rooty())
+            menu.add_command(label='Contrast Stretching', command=lambda: (display_after_img(),chart_histogram(), call_thay_doi_sang(1)))
+            menu.add_command(label='Linear Blending', command=lambda: (display_after_img(),chart_histogram(), call_thay_doi_sang(2)))
+            menu.post(radiobutton_3.winfo_rootx(), radiobutton_4.winfo_rooty())
 
 root.mainloop()
 
